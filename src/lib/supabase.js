@@ -1,5 +1,5 @@
-const SUPABASE_URL = 'https://ixnimrrzvhnijiusojqr.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4bmltcnJ6dmhuaWppdXNvanFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3OTE0NTksImV4cCI6MjA4NjM2NzQ1OX0.nlXsW77m4BWVJYYjvaOiIwD8DAwBL3pB-jvGzyDmvBk';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = {
     auth: {
