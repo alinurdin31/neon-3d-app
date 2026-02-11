@@ -1,5 +1,4 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-
 import { supabase } from '../lib/supabase';
 
 const DataContext = createContext();
@@ -7,7 +6,7 @@ const DataContext = createContext();
 export const useData = () => useContext(DataContext);
 
 export const DataProvider = ({ children }) => {
-    // --- Initial Data ---
+    // --- Initial Data (Defaults for local sync/fallback) ---
     const initialProducts = [
         { id: 101, name: 'Neon Controller Hub', category: 'Aksesoris', stock: 45, price: 550000, cost: 300000, status: 'Aktif' },
         { id: 102, name: 'Panel Matriks RGB', category: 'Tampilan', stock: 12, price: 1200000, cost: 750000, status: 'Stok Rendah' },
@@ -20,61 +19,6 @@ export const DataProvider = ({ children }) => {
     const initialEmployees = [
         { id: 1, name: 'Alice Cyber', role: 'Manajer Toko', salary: 4500000, status: 'Menunggu', joinDate: '2023-01-15', phone: '081234567890' },
         { id: 2, name: 'Bob Nexus', role: 'Sales Associate', salary: 3200000, status: 'Menunggu', joinDate: '2023-03-10', phone: '089876543210' },
-    ];
-
-    // Comprehensive PSAK Standard COA
-    const initialAccounts = [
-        // 1-xxxx ASET (ASSETS)
-        // 1-1xxx Aset Lancar
-        { code: '1-1100', name: 'Kas Tunai', type: 'Asset' },
-        { code: '1-1110', name: 'Bank BCA', type: 'Asset' },
-        { code: '1-1120', name: 'Bank Mandiri', type: 'Asset' },
-        { code: '1-1130', name: 'QRIS / E-Wallet', type: 'Asset' },
-        { code: '1-1200', name: 'Piutang Usaha', type: 'Asset' },
-        { code: '1-1300', name: 'Persediaan Barang Dagang', type: 'Asset' },
-        { code: '1-1400', name: 'Perlengkapan Toko', type: 'Asset' },
-        { code: '1-1500', name: 'Sewa Dibayar Dimuka', type: 'Asset' },
-
-        // 1-2xxx Aset Tetap
-        { code: '1-2100', name: 'Peralatan Toko', type: 'Asset' },
-        { code: '1-2110', name: 'Akumulasi Penyusutan Peralatan', type: 'Asset' }, // Contra Asset
-        { code: '1-2200', name: 'Kendaraan', type: 'Asset' },
-        { code: '1-2210', name: 'Akumulasi Penyusutan Kendaraan', type: 'Asset' },
-
-        // 2-xxxx KEWAJIBAN (LIABILITIES)
-        // 2-1xxx Kewajiban Lancar
-        { code: '2-1100', name: 'Hutang Usaha', type: 'Liability' },
-        { code: '2-1200', name: 'Hutang Gaji', type: 'Liability' },
-        { code: '2-1300', name: 'Hutang Pajak', type: 'Liability' },
-
-        // 2-2xxx Kewajiban Jangka Panjang
-        { code: '2-2100', name: 'Hutang Bank', type: 'Liability' },
-
-        // 3-xxxx EKUITAS (EQUITY)
-        { code: '3-1000', name: 'Modal Pemilik', type: 'Equity' },
-        { code: '3-2000', name: 'Prive Pemilik', type: 'Equity' },
-        { code: '3-3000', name: 'Laba Ditahan', type: 'Equity' },
-
-        // 4-xxxx PENDAPATAN (REVENUE)
-        { code: '4-1000', name: 'Pendapatan Penjualan', type: 'Revenue' },
-        { code: '4-2000', name: 'Pendapatan Jasa', type: 'Revenue' },
-        { code: '4-3000', name: 'Pendapatan Lain-lain', type: 'Revenue' },
-
-        // 5-xxxx BEBAN POKOK (COGS)
-        { code: '5-1000', name: 'Harga Pokok Penjualan (HPP)', type: 'Expense' },
-        { code: '5-2000', name: 'Potongan Penjualan', type: 'Expense' },
-        { code: '5-3000', name: 'Retur Penjualan', type: 'Expense' },
-
-        // 6-xxxx BEBAN OPERASIONAL (EXPENSES)
-        { code: '6-1000', name: 'Beban Gaji & Upah', type: 'Expense' },
-        { code: '6-1100', name: 'Beban Listrik, Air & Internet', type: 'Expense' },
-        { code: '6-1200', name: 'Beban Sewa', type: 'Expense' },
-        { code: '6-1300', name: 'Beban Iklan & Promosi', type: 'Expense' },
-        { code: '6-1400', name: 'Beban Perlengkapan', type: 'Expense' },
-        { code: '6-1500', name: 'Beban Transportasi', type: 'Expense' },
-        { code: '6-1600', name: 'Beban Pemeliharaan', type: 'Expense' },
-        { code: '6-1700', name: 'Beban Penyusutan', type: 'Expense' },
-        { code: '6-9000', name: 'Beban Operasional Lainnya', type: 'Expense' },
     ];
 
     const initialSettings = {
@@ -91,43 +35,104 @@ export const DataProvider = ({ children }) => {
     ];
 
     // --- State ---
-    const [products, setProducts] = useState(() => JSON.parse(localStorage.getItem('products')) || initialProducts);
-    const [transactions, setTransactions] = useState(() => JSON.parse(localStorage.getItem('transactions')) || []);
-    const [journal, setJournal] = useState(() => JSON.parse(localStorage.getItem('journal')) || []);
-    const [employees, setEmployees] = useState(() => JSON.parse(localStorage.getItem('employees')) || initialEmployees);
-    const [accounts, setAccounts] = useState(() => JSON.parse(localStorage.getItem('accounts')) || initialAccounts);
-    const [settings, setSettings] = useState(() => JSON.parse(localStorage.getItem('settings')) || initialSettings);
-    const [customers, setCustomers] = useState(() => JSON.parse(localStorage.getItem('customers')) || initialCustomers);
-    const [jobs, setJobs] = useState(() => JSON.parse(localStorage.getItem('jobs')) || []);
+    const [products, setProducts] = useState([]);
+    const [transactions, setTransactions] = useState([]);
+    const [journal, setJournal] = useState([]);
+    const [employees, setEmployees] = useState([]);
+    const [accounts, setAccounts] = useState([]);
+    const [settings, setSettings] = useState(initialSettings);
+    const [customers, setCustomers] = useState([]);
+    const [jobs, setJobs] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // --- Persistence ---
-    useEffect(() => { localStorage.setItem('products', JSON.stringify(products)); }, [products]);
-    useEffect(() => { localStorage.setItem('transactions', JSON.stringify(transactions)); }, [transactions]);
-    useEffect(() => { localStorage.setItem('journal', JSON.stringify(journal)); }, [journal]);
-    useEffect(() => { localStorage.setItem('employees', JSON.stringify(employees)); }, [employees]);
-    useEffect(() => { localStorage.setItem('accounts', JSON.stringify(accounts)); }, [accounts]);
-    useEffect(() => { localStorage.setItem('settings', JSON.stringify(settings)); }, [settings]);
-    useEffect(() => { localStorage.setItem('customers', JSON.stringify(customers)); }, [customers]);
-    useEffect(() => { localStorage.setItem('jobs', JSON.stringify(jobs)); }, [jobs]);
+    // --- Sync from Supabase ---
+    const fetchAllData = async () => {
+        setLoading(true);
+        try {
+            const { data: p } = await supabase.from('products').select();
+            const { data: e } = await supabase.from('employees').select();
+            const { data: c } = await supabase.from('customers').select();
+            const { data: j } = await supabase.from('jobs').select();
+            const { data: s } = await supabase.from('app_settings').select();
+            const { data: coa } = await supabase.from('chart_of_accounts').select();
+
+            // Complex fetch for journal (header + lines)
+            const { data: j_entries } = await supabase.from('journal_entries').select();
+            const { data: j_lines } = await supabase.from('journal_lines').select();
+
+            // Map DB fields to local state names if needed
+            // Seed initial data if Supabase is empty
+            if (!coa || coa.length === 0) {
+                console.log('Seeding COA to Supabase...');
+                await supabase.from('chart_of_accounts').insert(initialAccounts);
+                const { data: newCoa } = await supabase.from('chart_of_accounts').select();
+                setAccounts(newCoa || []);
+            } else {
+                setAccounts(coa || []);
+            }
+
+            if (!p || p.length === 0) {
+                console.log('Seeding initial products to Supabase...');
+                await supabase.from('products').insert(initialProducts.map(x => ({
+                    name: x.name, category: x.category, price: x.price, cost_price: x.cost, stock: x.stock, status: x.status
+                })));
+            }
+
+            if (!s || s.length === 0) {
+                console.log('Seeding initial settings...');
+                await updateSettings(initialSettings);
+            } else {
+                setSettings({ ...s[0], logoOp: s[0].logo_op });
+            }
+
+            // Map and Set for the rest
+            const currentP = p && p.length > 0 ? p : initialProducts;
+            setProducts(currentP.map(x => ({ ...x, cost: Number(x.cost_price || x.cost) })));
+
+            const currentE = e && e.length > 0 ? e : initialEmployees;
+            setEmployees(currentE.map(x => ({ ...x, joinDate: x.join_date || x.joinDate })));
+
+            setCustomers(c || []);
+            setJobs((j || []).map(x => ({ ...x, customerId: x.customer_id, employeeId: x.employee_id })));
+
+            // Reconstruct Journal
+            const fullJournal = (j_entries || []).map(entry => ({
+                ...entry,
+                desc: entry.description,
+                ref: entry.reference,
+                lines: (j_lines || []).filter(l => l.entry_id === entry.id)
+            }));
+            setJournal(fullJournal);
+
+            // Fetch Transactions (Sales)
+            const { data: sales } = await supabase.from('sales').select();
+            setTransactions(sales || []);
+
+        } catch (err) {
+            console.error('Initial fetch failed:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchAllData(); }, []);
 
     // --- Helpers ---
     const getAccountByPaymentMethod = (method) => {
         switch (method) {
-            case 'QRIS': return '1-1130'; // QRIS
-            case 'Bank': return '1-1110'; // Bank BCA
-            default: return '1-1100'; // Kas Tunai
+            case 'QRIS': return '1-1130';
+            case 'Bank': return '1-1110';
+            default: return '1-1100';
         }
     };
 
     // --- Actions ---
 
-    // 1. Process Sale (POS) - Connected to PSAK
-    const processSale = (cart, paymentDetails) => {
+    const processSale = async (cart, paymentDetails) => {
         const txId = `INV-${Date.now()}`;
         const date = new Date().toISOString().split('T')[0];
         const customer = customers.find(c => c.id === parseInt(paymentDetails.customerId)) || customers[0];
 
-        // Calculate totals
         const totalCost = cart.reduce((sum, item) => sum + (item.cost * item.quantity), 0);
         const subtotal = paymentDetails.subtotal;
         const discount = paymentDetails.discount || 0;
@@ -135,59 +140,50 @@ export const DataProvider = ({ children }) => {
         const finalTotal = paymentDetails.total;
         const paymentAccount = getAccountByPaymentMethod(paymentDetails.method);
 
-        // A. Transaction Record
-        const newTx = {
-            id: txId,
-            date,
-            type: 'Penjualan',
-            items: cart,
-            subtotal,
-            discount,
-            shipping,
+        // 1. Transaction (Sales)
+        const salePayload = {
+            // id: txId, // Auto-sync might clash with serial PK if DB uses serial, but let's assume we use auto-increment
+            customer_id: customer.id,
+            customer_name: customer.name,
             total: finalTotal,
-            paymentMethod: paymentDetails.method,
-            customerId: customer.id,
-            customerName: customer.name,
-            customerAddress: customer.address
+            payment_method: paymentDetails.method,
+            status: 'completed'
         };
-        setTransactions(prev => [newTx, ...prev]);
+        const { data: saleData } = await supabase.from('sales').insert(salePayload);
+        const realSaleId = saleData[0]?.id;
 
-        // B. Deduct Stock
-        const newProducts = products.map(p => {
-            const cartItem = cart.find(c => c.id === p.id);
-            if (cartItem) {
-                const newStock = p.stock - cartItem.quantity;
-                return {
-                    ...p,
-                    stock: Math.max(0, newStock),
+        // 2. Sale Items
+        const saleItems = cart.map(item => ({
+            sale_id: realSaleId,
+            product_id: item.id,
+            product_name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            cost_price: item.cost
+        }));
+        await supabase.from('sale_items').insert(saleItems);
+
+        // 3. Stock Deduct
+        for (const item of cart) {
+            const prod = products.find(p => p.id === item.id);
+            if (prod) {
+                const newStock = Math.max(0, prod.stock - item.quantity);
+                await supabase.from('products').update({ id: item.id }, {
+                    stock: newStock,
                     status: newStock === 0 ? 'Habis' : newStock < 10 ? 'Stok Rendah' : 'Aktif'
-                };
+                });
             }
-            return p;
-        });
-        setProducts(newProducts);
+        }
 
-        // C. Accounting (PSAK)
+        // 4. Accounting (PSAK)
         let debits = [];
         let credits = [];
-
-        // 1. Receive Payment (Dr. Cash/Bank)
         debits.push({ code: paymentAccount, amount: finalTotal });
-
-        // 2. Sales Discount (Dr. Expense)
-        if (discount > 0) {
-            debits.push({ code: '5-2000', amount: discount });
-        }
-
-        // 3. Revenue (Cr. Sales)
+        if (discount > 0) debits.push({ code: '5-2000', amount: discount });
         credits.push({ code: '4-1000', amount: subtotal });
+        if (shipping > 0) credits.push({ code: '4-3000', amount: shipping });
 
-        // 4. Shipping (Cr. Other Revenue)
-        if (shipping > 0) {
-            credits.push({ code: '4-3000', amount: shipping }); // Pendapatan Lain-lain
-        }
-
-        addJournalEntry({
+        await addJournalEntry({
             date,
             desc: `Penjualan ${txId} - ${customer.name}`,
             ref: txId,
@@ -197,42 +193,31 @@ export const DataProvider = ({ children }) => {
             ]
         });
 
-        // 5. COGS (Dr. HPP, Cr. Inventory)
-        addJournalEntry({
+        // 5. COGS
+        await addJournalEntry({
             date,
             desc: `HPP Penjualan ${txId}`,
             ref: txId,
             lines: [
-                { code: '5-1000', debit: totalCost, credit: 0 }, // Dr HPP
-                { code: '1-1300', debit: 0, credit: totalCost }  // Cr Inventory
+                { code: '5-1000', debit: totalCost, credit: 0 },
+                { code: '1-1300', debit: 0, credit: totalCost }
             ]
         });
 
+        fetchAllData(); // Refresh UI
         return txId;
     };
 
-    // 2. Process Payroll (Connected to PSAK)
-    const paySalary = (employeeId) => {
+    const paySalary = async (employeeId) => {
         const emp = employees.find(e => e.id === employeeId);
         if (!emp) return;
 
         const txId = `PAY-${Date.now()}`;
         const date = new Date().toISOString().split('T')[0];
 
-        setEmployees(prev => prev.map(e => e.id === employeeId ? { ...e, status: 'Dibayar' } : e));
+        await supabase.from('employees').update({ id: employeeId }, { status: 'Dibayar' });
 
-        setTransactions(prev => [{
-            id: txId,
-            date,
-            type: 'Pengeluaran',
-            category: 'Gaji',
-            desc: `Gaji Bulan Ini - ${emp.name}`,
-            total: emp.salary,
-            paymentMethod: 'Transfer'
-        }, ...prev]);
-
-        // Dr Beban Gaji (6-1000), Cr Bank BCA (1-1110)
-        addJournalEntry({
+        await addJournalEntry({
             date,
             desc: `Pembayaran Gaji - ${emp.name}`,
             ref: txId,
@@ -241,31 +226,22 @@ export const DataProvider = ({ children }) => {
                 { code: '1-1110', debit: 0, credit: emp.salary }
             ]
         });
+
+        fetchAllData();
     };
 
-    // 3. Purchase / Restock (New Feature)
-    const restockProduct = (item, qty, costPerUnit, totalCost, paymentMethod) => {
+    const restockProduct = async (item, qty, costPerUnit, totalCost, paymentMethod) => {
         const txId = `PUR-${Date.now()}`;
         const date = new Date().toISOString().split('T')[0];
         const accountCode = getAccountByPaymentMethod(paymentMethod);
 
-        // Update Product Stock & Cost
-        const newProducts = products.map(p => {
-            if (p.id === item.id) {
-                // Weighted Average Cost calculation could go here, but keeping simple for now
-                return {
-                    ...p,
-                    stock: p.stock + parseInt(qty),
-                    cost: parseInt(costPerUnit), // Update latest cost
-                    status: 'Aktif'
-                };
-            }
-            return p;
+        await supabase.from('products').update({ id: item.id }, {
+            stock: item.stock + parseInt(qty),
+            cost_price: parseInt(costPerUnit),
+            status: 'Aktif'
         });
-        setProducts(newProducts);
 
-        // Journal: Dr Inventory (1-1300), Cr Cash/Bank
-        addJournalEntry({
+        await addJournalEntry({
             date,
             desc: `Restock: ${item.name} (${qty} pcs)`,
             ref: txId,
@@ -274,71 +250,207 @@ export const DataProvider = ({ children }) => {
                 { code: accountCode, debit: 0, credit: totalCost }
             ]
         });
+
+        fetchAllData();
     };
 
-    // 4. Add General Journal Entry
-    const addJournalEntry = ({ date, desc, ref, lines }) => {
+    const addJournalEntry = async ({ date, desc, ref, lines }) => {
         const entryId = `JV-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        const newEntry = {
-            id: entryId, date, desc, ref, lines
-        };
-        setJournal(prev => [newEntry, ...prev]);
+
+        // 1. Header
+        await supabase.from('journal_entries').insert({
+            id: entryId,
+            date,
+            description: desc,
+            reference: ref
+        });
+
+        // 2. Lines
+        const linePayloads = lines.map(line => ({
+            entry_id: entryId,
+            account_code: line.code,
+            debit: line.debit,
+            credit: line.credit
+        }));
+        await supabase.from('journal_lines').insert(linePayloads);
+
+        fetchAllData();
     };
 
-    // 5. Clear All Data (Reset)
-    const clearAllData = () => {
-        localStorage.clear();
-        setProducts(initialProducts);
-        setTransactions([]);
-        setJournal([]);
-        setEmployees(initialEmployees);
-        setAccounts(initialAccounts);
-        setSettings(initialSettings);
-        setCustomers(initialCustomers);
-        setJobs([]);
-        window.location.reload(); // Force reload to clear any stale state
+    const clearAllData = async () => {
+        if (!window.confirm("RESET DATABASE: Semua data di Supabase akan dibersihkan. Lanjut?")) return;
+
+        // This is complex for Supabase without a stored procedure, 
+        // but for now let's just clear local state and alert
+        // A real implementation would delete all rows from tables.
+
+        const tables = ['journal_lines', 'journal_entries', 'jobs', 'employees', 'products', 'customers', 'sales', 'sale_items'];
+        for (const t of tables) {
+            // Delete all (using a range match or similar if supported)
+            // supabase-js normally uses .delete().neq('id', 0)
+            await supabase.from(t).delete({});
+        }
+
+        window.location.reload();
     };
 
-    // 6. Supabase Logout
     const logout = async () => {
         if (window.confirm("Apakah Anda yakin ingin logout?")) {
             await supabase.auth.signOut();
         }
     };
 
-    // CRUDs
-    const addProduct = (p) => setProducts([...products, { ...p, id: Date.now() }]);
-    const updateProduct = (id, p) => setProducts(products.map(x => x.id === id ? { ...x, ...p } : x));
-    const deleteProduct = (id) => setProducts(products.filter(x => x.id !== id));
+    // CRUDs with Supabase Sync
+    const addProduct = async (p) => {
+        await supabase.from('products').insert({
+            name: p.name,
+            category: p.category,
+            price: p.price,
+            cost_price: p.cost,
+            stock: p.stock,
+            status: p.status
+        });
+        fetchAllData();
+    };
 
-    const addEmployee = (e) => setEmployees([...employees, { ...e, id: Date.now() }]);
-    const updateEmployee = (id, e) => setEmployees(employees.map(x => x.id === id ? { ...x, ...e } : x));
-    const deleteEmployee = (id) => setEmployees(employees.filter(x => x.id !== id));
+    const updateProduct = async (id, p) => {
+        await supabase.from('products').update({ id }, {
+            name: p.name,
+            category: p.category,
+            price: p.price,
+            cost_price: p.cost,
+            stock: p.stock,
+            status: p.status
+        });
+        fetchAllData();
+    };
 
-    const addCustomer = (c) => setCustomers([...customers, { ...c, id: Date.now() }]);
-    const updateCustomer = (id, c) => setCustomers(customers.map(x => x.id === id ? { ...x, ...c } : x));
-    const deleteCustomer = (id) => setCustomers(customers.filter(x => x.id !== id));
+    const deleteProduct = async (id) => {
+        await supabase.from('products').delete({ id });
+        fetchAllData();
+    };
 
-    const addAccount = (a) => setAccounts([...accounts, { ...a }]);
-    const updateAccount = (code, a) => setAccounts(accounts.map(x => x.code === code ? { ...x, ...a } : x));
-    const deleteAccount = (code) => setAccounts(accounts.filter(x => x.code !== code));
+    const addEmployee = async (e) => {
+        await supabase.from('employees').insert({
+            name: e.name,
+            role: e.role,
+            salary: e.salary,
+            status: e.status,
+            join_date: e.joinDate,
+            phone: e.phone
+        });
+        fetchAllData();
+    };
 
-    const addJob = (j) => setJobs([...jobs, { ...j, id: `JOB-${Date.now()}` }]);
-    const updateJob = (id, j) => setJobs(jobs.map(x => x.id === id ? { ...x, ...j } : x));
-    const deleteJob = (id) => setJobs(jobs.filter(x => x.id !== id));
+    const updateEmployee = async (id, e) => {
+        await supabase.from('employees').update({ id }, {
+            name: e.name,
+            role: e.role,
+            salary: e.salary,
+            status: e.status,
+            join_date: e.joinDate,
+            phone: e.phone
+        });
+        fetchAllData();
+    };
 
-    const updateSettings = (s) => setSettings({ ...settings, ...s });
+    const deleteEmployee = async (id) => {
+        await supabase.from('employees').delete({ id });
+        fetchAllData();
+    };
+
+    const addCustomer = async (c) => {
+        await supabase.from('customers').insert({
+            name: c.name,
+            phone: c.phone,
+            address: c.address
+        });
+        fetchAllData();
+    };
+
+    const updateCustomer = async (id, c) => {
+        await supabase.from('customers').update({ id }, {
+            name: c.name,
+            phone: c.phone,
+            address: c.address
+        });
+        fetchAllData();
+    };
+
+    const deleteCustomer = async (id) => {
+        await supabase.from('customers').delete({ id });
+        fetchAllData();
+    };
+
+    const addAccount = async (a) => {
+        await supabase.from('chart_of_accounts').insert(a);
+        fetchAllData();
+    };
+
+    const updateAccount = async (code, a) => {
+        await supabase.from('chart_of_accounts').update({ code }, a);
+        fetchAllData();
+    };
+
+    const deleteAccount = async (code) => {
+        await supabase.from('chart_of_accounts').delete({ code });
+        fetchAllData();
+    };
+
+    const addJob = async (j) => {
+        await supabase.from('jobs').insert({
+            id: j.id,
+            title: j.title,
+            customer_id: j.customerId,
+            employee_id: j.employeeId,
+            status: j.status,
+            deadline: j.deadline,
+            desc: j.desc,
+            cost: j.cost
+        });
+        fetchAllData();
+    };
+
+    const updateJob = async (id, j) => {
+        await supabase.from('jobs').update({ id }, {
+            title: j.title,
+            customer_id: j.customerId,
+            employee_id: j.employeeId,
+            status: j.status,
+            deadline: j.deadline,
+            desc: j.desc,
+            cost: j.cost
+        });
+        fetchAllData();
+    };
+
+    const deleteJob = async (id) => {
+        await supabase.from('jobs').delete({ id });
+        fetchAllData();
+    };
+
+    const updateSettings = async (s) => {
+        await supabase.from('app_settings').upsert({
+            id: 1,
+            name: s.name,
+            address: s.address,
+            phone: s.phone,
+            email: s.email,
+            logo_op: s.logoOp
+        });
+        fetchAllData();
+    };
 
     return (
         <DataContext.Provider value={{
-            products, transactions, journal, employees, accounts, settings, customers, jobs,
+            products, transactions, journal, employees, accounts, settings, customers, jobs, loading,
             processSale, paySalary, restockProduct, addJournalEntry, clearAllData, logout,
             addProduct, updateProduct, deleteProduct,
             addEmployee, updateEmployee, deleteEmployee,
             addCustomer, updateCustomer, deleteCustomer,
             addAccount, updateAccount, deleteAccount,
             addJob, updateJob, deleteJob,
-            updateSettings
+            updateSettings, fetchAllData
         }}>
             {children}
         </DataContext.Provider>

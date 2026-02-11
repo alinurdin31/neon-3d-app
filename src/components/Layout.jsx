@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, ChevronLeft } from 'lucide-react';
 import Sidebar from './Sidebar';
-import MobileNavbar from './MobileNavbar'; // Import the new component
+import MobileNavbar from './MobileNavbar';
+import { useData } from '../context/DataContext';
+import { Loader2 } from 'lucide-react';
 
 const Layout = ({ children }) => {
+    const { loading } = useData();
     // Initialize based on screen width to default open on desktop, closed on mobile
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
@@ -62,7 +65,12 @@ const Layout = ({ children }) => {
                 </div>
 
                 <div className="relative z-10">
-                    {children}
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+                            <Loader2 className="w-12 h-12 text-neon-cyan animate-spin" />
+                            <p className="text-gray-400 font-medium animate-pulse">Sinkronisasi Cloud...</p>
+                        </div>
+                    ) : children}
                 </div>
             </main>
 
