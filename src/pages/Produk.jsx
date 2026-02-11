@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Archive, Plus, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { supabase } from '../lib/supabase';

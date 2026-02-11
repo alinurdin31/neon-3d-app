@@ -136,10 +136,9 @@ export const supabase = {
             delete: async (match = {}) => {
                 let queryParams = '';
                 if (Object.keys(match).length === 0) {
-                    // For a global delete, we use a filter that typically matches everything
-                    // PostgREST requires at least one filter for DELETE
-                    // We'll try to find a column to filter on, or default to a common one
-                    queryParams = 'id=neq.-1';
+                    // Try to match all using id if no filter provided. 
+                    // Note: This assumes 'id' exists. If not, specialized filters should be used in the call.
+                    queryParams = 'id=not.is.null';
                 } else {
                     queryParams = Object.keys(match).map(k => {
                         const val = match[k];
@@ -152,7 +151,13 @@ export const supabase = {
                     method: 'DELETE',
                     headers: { ...headers, 'Authorization': getAuthHeader() }
                 });
-                return { data: res.ok, error: res.ok ? null : true };
+
+                if (!res.ok) {
+                    const error = await res.json().catch(() => ({ message: 'Unknown error' }));
+                    return { data: null, error };
+                }
+
+                return { data: true, error: null };
             },
             upsert: async (data, onConflict = 'id') => {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {

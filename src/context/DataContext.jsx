@@ -340,43 +340,31 @@ export const DataProvider = ({ children }) => {
             ];
 
             for (const t of tables) {
-                // Specialized deletion for tables without 'id' column
+                let result;
+                // Specialized deletion for tables without 'id' column or specific constraints
                 if (t === 'chart_of_accounts') {
-                    await supabase.from(t).delete({ code: 'neq.0000' });
+                    result = await supabase.from(t).delete({ code: 'not.is.null' });
                 } else if (t === 'app_settings') {
-                    await supabase.from(t).delete({ id: 'eq.1' });
+                    result = await supabase.from(t).delete({ id: 'eq.1' });
+                } else if (t === 'journal_entries') {
+                    // journal_entries has text id
+                    result = await supabase.from(t).delete({ id: 'not.is.null' });
                 } else {
-                    await supabase.from(t).delete({});
+                    result = await supabase.from(t).delete({});
+                }
+
+                if (result.error) {
+                    console.error(`Failed to clear table ${t}:`, result.error);
+                } else {
+                    console.log(`Table ${t} cleared successfully.`);
                 }
             }
 
-            // Re-seed with initial data
+            // Re-seed with essential system data only
             // 1. Chart of Accounts
             await supabase.from('chart_of_accounts').insert(initialAccounts);
 
-            // 2. Default Products
-            await supabase.from('products').insert(initialProducts.map(p => ({
-                name: p.name,
-                category: p.category,
-                price: p.price,
-                cost_price: p.cost,
-                stock: p.stock,
-                status: p.status
-            })));
-
-            // 3. Default Customers
-            await supabase.from('customers').insert(initialCustomers);
-
-            // 4. Default Employees
-            await supabase.from('employees').insert(initialEmployees.map(e => ({
-                name: e.name,
-                role: e.role,
-                salary: e.salary,
-                status: e.status,
-                phone: e.phone
-            })));
-
-            // 5. Default Settings
+            // 2. Default Settings
             await updateSettings(initialSettings);
 
             window.location.reload();
