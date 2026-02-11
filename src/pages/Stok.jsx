@@ -7,7 +7,7 @@ import Modal from '../components/Modal';
 const Stok = () => {
     const { products, journal, restockProduct } = useData();
     const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
-    const [restockForm, setRestockForm] = useState({ id: null, name: '', qty: 1, cost: 0, method: '1-1100' });
+    const [restockForm, setRestockForm] = useState({ id: null, name: '', qty: 1, cost: 0, method: '1101' });
     const [viewMode, setViewMode] = useState('inventory'); // 'inventory' or 'history'
 
     // Metrics

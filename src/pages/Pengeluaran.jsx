@@ -7,7 +7,7 @@ import Modal from '../components/Modal';
 const Pengeluaran = () => {
     const { transactions, setTransactions, addJournalEntry, accounts } = useData();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [formData, setFormData] = useState({ desc: '', amount: 0, expenseAccountCode: '', method: '1-1100' });
+    const [formData, setFormData] = useState({ desc: '', amount: 0, expenseAccountCode: '', method: '1101' });
 
     // Filter expenses
     const expenses = transactions.filter(t => t.type === 'Pengeluaran');

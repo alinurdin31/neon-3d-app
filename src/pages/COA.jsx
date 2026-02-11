@@ -43,9 +43,10 @@ const COA = () => {
             accessor: 'type',
             render: (acc) => (
                 <span className={`px-2 py-1 rounded text-xs border font-bold ${acc.type === 'Asset' ? 'border-neon-green text-neon-green bg-neon-green/10' :
-                        acc.type === 'Liability' ? 'border-neon-pink text-neon-pink bg-neon-pink/10' :
-                            acc.type === 'Equity' ? 'border-neon-purple text-neon-purple bg-neon-purple/10' :
-                                acc.type === 'Revenue' ? 'border-neon-cyan text-neon-cyan bg-neon-cyan/10' :
+                    acc.type === 'Liability' ? 'border-neon-pink text-neon-pink bg-neon-pink/10' :
+                        acc.type === 'Equity' ? 'border-neon-purple text-neon-purple bg-neon-purple/10' :
+                            acc.type === 'Revenue' ? 'border-neon-cyan text-neon-cyan bg-neon-cyan/10' :
+                                acc.type === 'Expense' ? 'border-neon-pink text-neon-pink bg-neon-pink/10' :
                                     'border-yellow-500 text-yellow-500 bg-yellow-500/10'
                     }`}>
                     {acc.type}

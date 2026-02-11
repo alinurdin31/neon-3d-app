@@ -15,7 +15,7 @@ const Produk = () => {
     // Forms
     const [productForm, setProductForm] = useState({ name: '', category: '', price: 0, cost: 0, stock: 0, imageUrl: '' });
     const [editingId, setEditingId] = useState(null);
-    const [restockForm, setRestockForm] = useState({ id: null, name: '', qty: 1, cost: 0, method: '1-1100' });
+    const [restockForm, setRestockForm] = useState({ id: null, name: '', qty: 1, cost: 0, method: '1101' });
 
     // Formatters
     const formatRupiah = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);

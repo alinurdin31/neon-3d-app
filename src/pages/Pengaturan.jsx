@@ -4,7 +4,7 @@ import { useData } from '../context/DataContext';
 import { supabase } from '../lib/supabase';
 
 const Pengaturan = () => {
-    const { settings, updateSettings, clearAllData } = useData();
+    const { settings, updateSettings, clearAllData, seedInitialCOA, seedInitialProducts } = useData();
     const [formData, setFormData] = useState(settings);
     const [saved, setSaved] = useState(false);
 
@@ -179,6 +179,39 @@ const Pengaturan = () => {
                         <Save className={`w-5 h-5 ${saved ? 'animate-bounce' : ''}`} />
                         {saved ? 'Berhasil Disimpan!' : 'Simpan Pengaturan'}
                     </button>
+                </div>
+            </div>
+
+            {/* Initialization Data */}
+            <div className="glass-card p-8 border-neon-cyan/20 bg-neon-cyan/5 rounded-xl">
+                <h3 className="text-neon-cyan font-bold text-lg mb-2">Inisialisasi Data</h3>
+                <p className="text-gray-400 text-sm mb-6">Klik tombol di bawah ini jika Anda ingin mengisi database dengan data awal (Seeding).</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex justify-between items-center bg-black/40 p-4 rounded-lg border border-neon-cyan/10">
+                        <div>
+                            <h4 className="text-white font-medium text-sm">Seed Chart of Accounts (COA)</h4>
+                            <p className="text-gray-500 text-[10px] mt-1">Mengisi daftar akun standar PSAK (Glasswool).</p>
+                        </div>
+                        <button
+                            onClick={seedInitialCOA}
+                            className="px-4 py-2 bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/50 rounded-lg hover:bg-neon-cyan hover:text-black transition-all text-xs font-bold"
+                        >
+                            Init COA
+                        </button>
+                    </div>
+                    <div className="flex justify-between items-center bg-black/40 p-4 rounded-lg border border-neon-purple/10">
+                        <div>
+                            <h4 className="text-white font-medium text-sm">Seed Demo Products</h4>
+                            <p className="text-gray-500 text-[10px] mt-1">Mengisi beberapa produk demo untuk testing.</p>
+                        </div>
+                        <button
+                            onClick={seedInitialProducts}
+                            className="px-4 py-2 bg-neon-purple/20 text-neon-purple border border-neon-purple/50 rounded-lg hover:bg-neon-purple hover:text-white transition-all text-xs font-bold"
+                        >
+                            Init Produk
+                        </button>
+                    </div>
                 </div>
             </div>
 

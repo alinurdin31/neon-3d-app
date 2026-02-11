@@ -35,35 +35,47 @@ export const DataProvider = ({ children }) => {
     ];
 
     const initialAccounts = [
-        // 1-XXXX: ASET
-        { code: '1-1100', name: 'Kas Tunai', type: 'Aset', category: 'Aset Lancar', description: 'Uang kas di tangan' },
-        { code: '1-1110', name: 'Bank BCA', type: 'Aset', category: 'Aset Lancar', description: 'Rekening operasional' },
-        { code: '1-1130', name: 'Piutang QRIS', type: 'Aset', category: 'Aset Lancar', description: 'Dana mengendap dari QRIS' },
-        { code: '1-1200', name: 'Piutang Usaha', type: 'Aset', category: 'Aset Lancar', description: 'Tagihan ke pelanggan' },
-        { code: '1-1300', name: 'Persediaan Barang', type: 'Aset', category: 'Aset Lancar', description: 'Stok produk 3D' },
-        { code: '1-2100', name: 'Peralatan 3D Printer', type: 'Aset', category: 'Aset Tetap', description: 'Mesin printer 3D' },
+        // 1XXX: ASET
+        { code: '1100', name: 'Aset Lancar', type: 'Asset', category: 'Aset Lancar', description: '' },
+        { code: '1101', name: 'Kas dan Setara Kas', type: 'Asset', category: 'Aset Lancar', description: 'Uang tunai di tangan dan saldo bank.' },
+        { code: '1102', name: 'Piutang Usaha', type: 'Asset', category: 'Aset Lancar', description: 'Tagihan kepada pelanggan.' },
+        { code: '1103', name: 'Persediaan Barang Dagang', type: 'Asset', category: 'Aset Lancar', description: 'Stok Glasswool siap jual (PSAK 202).' },
+        { code: '1104', name: 'Pajak Dibayar di Muka', type: 'Asset', category: 'Aset Lancar', description: 'PPN Masukan atas impor/pembelian lokalan.' },
+        { code: '1105', name: 'Uang Muka Supplier', type: 'Asset', category: 'Aset Lancar', description: 'Pembayaran DP untuk order kontainer (Impor).' },
+        { code: '1200', name: 'Aset Tidak Lancar', type: 'Asset', category: 'Aset Lancar', description: '' },
+        { code: '1201', name: 'Tanah', type: 'Asset', category: 'Aset Tetap', description: 'Aset tetap yang tidak disusutkan.' },
+        { code: '1202', name: 'Bangunan (Gudang)', type: 'Asset', category: 'Aset Tetap', description: 'Nilai perolehan gudang (PSAK 216).' },
+        { code: '1203', name: 'Akum. Penyusutan Bangunan', type: 'Asset', category: 'Aset Tetap', description: 'Pengurang nilai bangunan.' },
+        { code: '1204', name: 'Kendaraan Operasional', type: 'Asset', category: 'Aset Tetap', description: 'Mobil box pengiriman.' },
+        { code: '1205', name: 'Akum. Penyusutan Kendaraan', type: 'Asset', category: 'Aset Tetap', description: 'Pengurang nilai kendaraan.' },
 
-        // 2-XXXX: KEWAJIBAN
-        { code: '2-1100', name: 'Hutang Dagang', type: 'Kewajiban', category: 'Kewajiban Lancar', description: 'Hutang ke supplier' },
-        { code: '2-1200', name: 'Hutang Gaji', type: 'Kewajiban', category: 'Kewajiban Lancar', description: 'Gaji belum dibayar' },
+        // 2XXX: LIABILITAS
+        { code: '2100', name: 'Liabilitas Jangka Pendek', type: 'Liability', category: 'Kewajiban Lancar', description: '' },
+        { code: '2101', name: 'Utang Usaha', type: 'Liability', category: 'Kewajiban Lancar', description: 'Utang ke supplier (misal: Hebei Binqi Trading).' },
+        { code: '2102', name: 'Utang Pajak', type: 'Liability', category: 'Kewajiban Lancar', description: 'PPN Keluaran, PPh 21, PPh 23, dsb.' },
+        { code: '2103', name: 'Biaya YMH Dibayar', type: 'Liability', category: 'Kewajiban Lancar', description: 'Biaya yang sudah terjadi tapi belum dibayar (Listrik, Gaji).' },
+        { code: '2104', name: 'Pendapatan Diterima Dimuka', type: 'Liability', category: 'Kewajiban Lancar', description: 'DP dari customer sebelum barang dikirim.' },
+        { code: '2200', name: 'Liabilitas Jangka Panjang', type: 'Liability', category: 'Kewajiban Jangka Panjang', description: '' },
+        { code: '2201', name: 'Utang Bank Jangka Panjang', type: 'Liability', category: 'Kewajiban Jangka Panjang', description: 'Pinjaman modal kerja di atas 1 tahun.' },
 
-        // 3-XXXX: EKUITAS
-        { code: '3-1000', name: 'Modal Pemilik', type: 'Ekuitas', category: 'Modal', description: 'Modal awal' },
-        { code: '3-2000', name: 'Laba Ditahan', type: 'Ekuitas', category: 'Modal', description: 'Akumulasi keuntungan' },
+        // 3XXX: EKUITAS
+        { code: '3101', name: 'Modal Saham / Modal Pemilik', type: 'Equity', category: 'Modal', description: 'Modal disetor oleh Ali/Pemilik.' },
+        { code: '3201', name: 'Saldo Laba (Retained Earnings)', type: 'Equity', category: 'Modal', description: 'Laba tahun-tahun sebelumnya yang ditahan.' },
+        { code: '3301', name: 'Laba Rugi Tahun Berjalan', type: 'Equity', category: 'Modal', description: 'Hasil keuntungan periode sekarang.' },
 
-        // 4-XXXX: PENDAPATAN
-        { code: '4-1000', name: 'Pendapatan Penjualan', type: 'Pendapatan', category: 'Pendapatan Usaha', description: 'Hasil penjualan produk' },
-        { code: '4-2000', name: 'Pendapatan Jasa Cetak', type: 'Pendapatan', category: 'Pendapatan Usaha', description: 'Hasil jasa desain/cetak' },
-        { code: '4-3000', name: 'Pendapatan Pengiriman', type: 'Pendapatan', category: 'Pendapatan Lain', description: 'Ongkos kirim' },
+        // 4XXX: PENDAPATAN
+        { code: '4100', name: 'Pendapatan Usaha', type: 'Revenue', category: 'Pendapatan Usaha', description: 'Penjualan Glasswool (PSAK 115).' },
 
-        // 5-XXXX: HARGA POKOK PENJUALAN
-        { code: '5-1000', name: 'HPP Penjualan', type: 'Beban', category: 'HPP', description: 'Harga pokok barang terjual' },
-        { code: '5-2000', name: 'Diskon Penjualan', type: 'Beban', category: 'Diskon', description: 'Potongan harga' },
+        // 5XXX: HPP
+        { code: '5100', name: 'Harga Pokok Penjualan (HPP)', type: 'Expense', category: 'HPP', description: 'Nilai beli barang + biaya logistik impor.' },
 
-        // 6-XXXX: BEBAN
-        { code: '6-1000', name: 'Beban Gaji Karyawan', type: 'Beban', category: 'Beban Operasional', description: 'Gaji bulanan' },
-        { code: '6-2000', name: 'Beban Listrik & Internet', type: 'Beban', category: 'Beban Operasional', description: 'Utilitas' },
-        { code: '6-3000', name: 'Beban Sewa Tempat', type: 'Beban', category: 'Beban Operasional', description: 'Sewa gedung' },
+        // 6XXX: BEBAN
+        { code: '6100', name: 'Beban Operasional', type: 'Expense', category: 'Beban Operasional', description: '' },
+        { code: '6101', name: 'Beban Gaji Karyawan', type: 'Expense', category: 'Beban Operasional', description: '' },
+        { code: '6102', name: 'Beban Sewa / Listrik / Air', type: 'Expense', category: 'Beban Operasional', description: '' },
+        { code: '6103', name: 'Beban Transportasi & BBM', type: 'Expense', category: 'Beban Operasional', description: 'Biaya pengiriman ke customer.' },
+        { code: '6104', name: 'Beban Penyusutan Aset Tetap', type: 'Expense', category: 'Beban Operasional', description: 'Alokasi biaya tahunan aset (Mobil/Gudang).' },
+        { code: '6105', name: 'Beban Pemasaran (Iklan)', type: 'Expense', category: 'Beban Operasional', description: 'Biaya iklan TikTok/Website.' },
     ];
 
     // --- State ---
@@ -100,25 +112,7 @@ export const DataProvider = ({ children }) => {
             const { data: j_lines } = await supabase.from('journal_lines').select();
 
             // Map DB fields to local state names if needed
-            // Seed initial data if Supabase is empty
-            if (Array.isArray(coa) && coa.length === 0) {
-                console.log('Seeding COA to Supabase...');
-                await supabase.from('chart_of_accounts').insert(initialAccounts);
-                const { data: newCoa } = await supabase.from('chart_of_accounts').select();
-                setAccounts(newCoa || initialAccounts);
-            } else if (Array.isArray(coa)) {
-                setAccounts(coa);
-            } else {
-                setAccounts(initialAccounts);
-            }
-
-            if (Array.isArray(p) && p.length === 0) {
-                console.log('Seeding initial products to Supabase...');
-                await supabase.from('products').insert(initialProducts.map(x => ({
-                    name: x.name, category: x.category, price: x.price, cost_price: x.cost, stock: x.stock, status: x.status
-                })));
-            }
-
+            // Seed initial data if Supabase is empty (only App Settings)
             if (Array.isArray(s) && s.length === 0) {
                 console.log('Seeding initial settings...');
                 await updateSettings(initialSettings);
@@ -126,8 +120,10 @@ export const DataProvider = ({ children }) => {
                 setSettings({ ...s[0], logoOp: s[0].logo_op, stampUrl: s[0].stamp_url });
             }
 
+            setAccounts(Array.isArray(coa) ? coa : []);
+
             // Map and Set for the rest
-            const currentP = Array.isArray(p) && p.length > 0 ? p : initialProducts;
+            const currentP = Array.isArray(p) ? p : [];
             setProducts(currentP.map(x => ({ ...x, cost: Number(x.cost_price || x.cost), imageUrl: x.image_url })));
 
             const currentE = Array.isArray(e) && e.length > 0 ? e : initialEmployees;
@@ -164,9 +160,9 @@ export const DataProvider = ({ children }) => {
     // --- Helpers ---
     const getAccountByPaymentMethod = (method) => {
         switch (method) {
-            case 'QRIS': return '1-1130';
-            case 'Bank': return '1-1110';
-            default: return '1-1100';
+            case 'QRIS': return '1103'; // Assuming Piutang QRIS or similar
+            case 'Bank': return '1101';
+            default: return '1101';
         }
     };
 
@@ -223,9 +219,9 @@ export const DataProvider = ({ children }) => {
         let debits = [];
         let credits = [];
         debits.push({ code: paymentAccount, amount: finalTotal });
-        if (discount > 0) debits.push({ code: '5-2000', amount: discount });
-        credits.push({ code: '4-1000', amount: subtotal });
-        if (shipping > 0) credits.push({ code: '4-3000', amount: shipping });
+        // Use 4100 for revenue/discount/shipping for now as other specific accounts were not provided by user
+        credits.push({ code: '4100', amount: subtotal });
+        if (shipping > 0) credits.push({ code: '4100', amount: shipping });
 
         await addJournalEntry({
             date,
@@ -243,8 +239,8 @@ export const DataProvider = ({ children }) => {
             desc: `HPP Penjualan ${txId}`,
             ref: txId,
             lines: [
-                { code: '5-1000', debit: totalCost, credit: 0 },
-                { code: '1-1300', debit: 0, credit: totalCost }
+                { code: '5100', debit: totalCost, credit: 0 },
+                { code: '1103', debit: 0, credit: totalCost }
             ]
         });
 
@@ -266,8 +262,8 @@ export const DataProvider = ({ children }) => {
             desc: `Pembayaran Gaji - ${emp.name}`,
             ref: txId,
             lines: [
-                { code: '6-1000', debit: emp.salary, credit: 0 },
-                { code: '1-1110', debit: 0, credit: emp.salary }
+                { code: '6101', debit: emp.salary, credit: 0 },
+                { code: '1101', debit: 0, credit: emp.salary }
             ]
         });
 
@@ -290,7 +286,7 @@ export const DataProvider = ({ children }) => {
             desc: `Restock: ${item.name} (${qty} pcs)`,
             ref: txId,
             lines: [
-                { code: '1-1300', debit: totalCost, credit: 0 },
+                { code: '1103', debit: totalCost, credit: 0 },
                 { code: accountCode, debit: 0, credit: totalCost }
             ]
         });
@@ -341,36 +337,54 @@ export const DataProvider = ({ children }) => {
 
             for (const t of tables) {
                 let result;
-                // Specialized deletion for tables without 'id' column or specific constraints
                 if (t === 'chart_of_accounts') {
                     result = await supabase.from(t).delete({ code: 'not.is.null' });
                 } else if (t === 'app_settings') {
                     result = await supabase.from(t).delete({ id: 'eq.1' });
                 } else if (t === 'journal_entries') {
-                    // journal_entries has text id
                     result = await supabase.from(t).delete({ id: 'not.is.null' });
                 } else {
                     result = await supabase.from(t).delete({});
                 }
-
-                if (result.error) {
-                    console.error(`Failed to clear table ${t}:`, result.error);
-                } else {
-                    console.log(`Table ${t} cleared successfully.`);
-                }
             }
 
-            // Re-seed with essential system data only
-            // 1. Chart of Accounts
-            await supabase.from('chart_of_accounts').insert(initialAccounts);
-
-            // 2. Default Settings
+            // ONLY Default Settings are re-seeded automatically
             await updateSettings(initialSettings);
 
             window.location.reload();
         } catch (error) {
             console.error("Reset Error:", error);
             alert("Gagal mereset database. Silakan coba lagi.");
+            setLoading(false);
+        }
+    };
+
+    const seedInitialCOA = async () => {
+        setLoading(true);
+        try {
+            await supabase.from('chart_of_accounts').insert(initialAccounts);
+            alert("COA berhasil di-seed!");
+            fetchAllData();
+        } catch (error) {
+            console.error("Seed COA Error:", error);
+            alert("Gagal seeding COA.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const seedInitialProducts = async () => {
+        setLoading(true);
+        try {
+            await supabase.from('products').insert(initialProducts.map(x => ({
+                name: x.name, category: x.category, price: x.price, cost_price: x.cost, stock: x.stock, status: x.status
+            })));
+            alert("Produk berhasil di-seed!");
+            fetchAllData();
+        } catch (error) {
+            console.error("Seed Products Error:", error);
+            alert("Gagal seeding Produk.");
+        } finally {
             setLoading(false);
         }
     };
@@ -529,6 +543,7 @@ export const DataProvider = ({ children }) => {
         <DataContext.Provider value={{
             products, transactions, journal, employees, accounts, settings, customers, jobs, loading, user,
             processSale, paySalary, restockProduct, addJournalEntry, clearAllData, logout,
+            seedInitialCOA, seedInitialProducts,
             addProduct, updateProduct, deleteProduct,
             addEmployee, updateEmployee, deleteEmployee,
             addCustomer, updateCustomer, deleteCustomer,

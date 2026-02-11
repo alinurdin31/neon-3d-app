@@ -69,8 +69,8 @@ const Pekerjaan = () => {
             desc: `Upah Penyelesaian Job #${job.id}`,
             ref: txId,
             lines: [
-                { code: '6-1000', debit: job.cost, credit: 0 }, // Beban Gaji & Upah
-                { code: '1-1100', debit: 0, credit: job.cost }  // Kas Tunai
+                { code: '6101', debit: job.cost, credit: 0 }, // Beban Gaji & Upah
+                { code: '1101', debit: 0, credit: job.cost }  // Kas Tunai
             ]
         });
 
