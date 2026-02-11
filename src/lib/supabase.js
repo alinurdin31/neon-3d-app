@@ -5,43 +5,89 @@ export const supabase = {
     auth: {
         getUser: async () => {
             const session = localStorage.getItem('sb-auth-token');
-            return session ? JSON.parse(session).user : null;
+            if (!session) return { data: { user: null }, error: null };
+            const parsed = JSON.parse(session);
+            return { data: { user: parsed.user }, error: null };
+        },
+        getSession: async () => {
+            const session = localStorage.getItem('sb-auth-token');
+            return { data: { session: session ? JSON.parse(session) : null }, error: null };
+        },
+        signIn: async ({ email, password }) => {
+            const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                localStorage.setItem('sb-auth-token', JSON.stringify(data));
+                return { data, error: null };
+            }
+            return { data: null, error: data };
+        },
+        signUp: async ({ email, password, data }) => {
+            const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password, data })
+            });
+            const result = await res.json();
+            if (res.ok) {
+                // Supabase signup might require email confirmation, but usually returns the user
+                return { data: result, error: null };
+            }
+            return { data: null, error: result };
         },
         signOut: async () => {
             try {
-                await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${JSON.parse(localStorage.getItem('sb-auth-token'))?.access_token}`
-                    }
-                });
+                const session = localStorage.getItem('sb-auth-token');
+                if (session) {
+                    await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${JSON.parse(session).access_token}`
+                        }
+                    });
+                }
             } catch (e) {
                 console.error('Logout error:', e);
             }
             localStorage.removeItem('sb-auth-token');
-            window.location.reload();
+            window.location.href = '/login';
         }
     },
 
-    // Lightweight CRUD helpers using fetch
     from: (table) => {
+        const getAuthHeader = () => {
+            const session = localStorage.getItem('sb-auth-token');
+            return session ? `Bearer ${JSON.parse(session).access_token}` : `Bearer ${SUPABASE_ANON_KEY}`;
+        };
+
         const headers = {
             'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${JSON.parse(localStorage.getItem('sb-auth-token'))?.access_token || SUPABASE_ANON_KEY}`,
             'Content-Type': 'application/json',
             'Prefer': 'return=representation'
         };
 
         return {
             select: async (query = '*') => {
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=${query}`, { headers });
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=${query}`, {
+                    headers: { ...headers, 'Authorization': getAuthHeader() }
+                });
                 return { data: await res.json(), error: res.ok ? null : true };
             },
             insert: async (data) => {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
                     method: 'POST',
-                    headers,
+                    headers: { ...headers, 'Authorization': getAuthHeader() },
                     body: JSON.stringify(data)
                 });
                 return { data: await res.json(), error: res.ok ? null : true };
@@ -50,7 +96,7 @@ export const supabase = {
                 const queryParams = Object.keys(match).map(k => `${k}=eq.${match[k]}`).join('&');
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${queryParams}`, {
                     method: 'PATCH',
-                    headers,
+                    headers: { ...headers, 'Authorization': getAuthHeader() },
                     body: JSON.stringify(data)
                 });
                 return { data: await res.json(), error: res.ok ? null : true };
@@ -59,14 +105,18 @@ export const supabase = {
                 const queryParams = Object.keys(match).map(k => `${k}=eq.${match[k]}`).join('&');
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${queryParams}`, {
                     method: 'DELETE',
-                    headers
+                    headers: { ...headers, 'Authorization': getAuthHeader() }
                 });
                 return { data: res.ok, error: res.ok ? null : true };
             },
             upsert: async (data, onConflict = 'id') => {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
                     method: 'POST',
-                    headers: { ...headers, 'Prefer': `resolution=merge-duplicates,return=representation` },
+                    headers: {
+                        ...headers,
+                        'Authorization': getAuthHeader(),
+                        'Prefer': `resolution=merge-duplicates,return=representation`
+                    },
                     body: JSON.stringify(data)
                 });
                 return { data: await res.json(), error: res.ok ? null : true };

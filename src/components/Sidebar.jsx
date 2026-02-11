@@ -6,9 +6,10 @@ import {
     Settings, Users, Briefcase, List, LogOut
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useData } from '../context/DataContext';
 
 const Sidebar = () => {
-    const { logout } = useData();
+    const { logout, user } = useData();
     const navGroups = [
         {
             title: 'UTAMA',
@@ -95,10 +96,15 @@ const Sidebar = () => {
 
             <div className="p-4 border-t border-white/10 space-y-2">
                 <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-gradient-to-r from-neon-purple/20 to-transparent border border-white/5">
-                    <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs font-bold text-white">AD</div>
-                    <div className="flex-1">
-                        <p className="text-sm font-bold text-white">Admin User</p>
-                        <p className="text-xs text-neon-green">● Online</p>
+                    <div className="w-8 h-8 rounded-full bg-neon-cyan/20 flex items-center justify-center text-xs font-bold text-neon-cyan border border-neon-cyan/30">
+                        {user?.user_metadata?.display_name?.substring(0, 2).toUpperCase() || user?.email?.substring(0, 2).toUpperCase() || 'AD'}
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                        <p className="text-sm font-bold text-white truncate">{user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'User'}</p>
+                        <p className="text-[10px] text-neon-green flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 bg-neon-green rounded-full animate-pulse"></span>
+                            Online
+                        </p>
                     </div>
                 </div>
 

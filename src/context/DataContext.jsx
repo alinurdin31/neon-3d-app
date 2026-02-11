@@ -34,19 +34,16 @@ export const DataProvider = ({ children }) => {
         { id: 2, name: 'PT. Teknologi Maju', phone: '021-999-888', address: 'Kawasan Industri Pulo Gadung' },
     ];
 
-    // --- State ---
-    const [products, setProducts] = useState([]);
-    const [transactions, setTransactions] = useState([]);
-    const [journal, setJournal] = useState([]);
-    const [employees, setEmployees] = useState([]);
-    const [accounts, setAccounts] = useState([]);
-    const [settings, setSettings] = useState(initialSettings);
-    const [customers, setCustomers] = useState([]);
-    const [jobs, setJobs] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(null);
 
     // --- Sync from Supabase ---
     const fetchAllData = async () => {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) {
+            setLoading(false);
+            return;
+        }
+        setUser(userData.user);
         setLoading(true);
         try {
             const { data: p } = await supabase.from('products').select();
@@ -443,7 +440,7 @@ export const DataProvider = ({ children }) => {
 
     return (
         <DataContext.Provider value={{
-            products, transactions, journal, employees, accounts, settings, customers, jobs, loading,
+            products, transactions, journal, employees, accounts, settings, customers, jobs, loading, user,
             processSale, paySalary, restockProduct, addJournalEntry, clearAllData, logout,
             addProduct, updateProduct, deleteProduct,
             addEmployee, updateEmployee, deleteEmployee,
