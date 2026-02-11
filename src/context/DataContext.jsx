@@ -137,17 +137,20 @@ export const DataProvider = ({ children }) => {
             setJobs((Array.isArray(j) ? j : []).map(x => ({ ...x, customerId: x.customer_id, employeeId: x.employee_id })));
 
             // Reconstruct Journal
-            const fullJournal = (j_entries || []).map(entry => ({
+            const entriesArr = Array.isArray(j_entries) ? j_entries : [];
+            const linesArr = Array.isArray(j_lines) ? j_lines : [];
+
+            const fullJournal = entriesArr.map(entry => ({
                 ...entry,
                 desc: entry.description,
                 ref: entry.reference,
-                lines: (j_lines || []).filter(l => l.entry_id === entry.id)
+                lines: linesArr.filter(l => l.entry_id === entry.id)
             }));
             setJournal(fullJournal);
 
             // Fetch Transactions (Sales)
             const { data: sales } = await supabase.from('sales').select();
-            setTransactions(sales || []);
+            setTransactions(Array.isArray(sales) ? sales : []);
 
         } catch (err) {
             console.error('Initial fetch failed:', err);

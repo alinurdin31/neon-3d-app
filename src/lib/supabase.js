@@ -1,5 +1,5 @@
 const SUPABASE_URL = 'https://ixnimrrzvhnijiusojqr.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_ActbYxPQVWJmW8Qf_emvqw__E1zcxuV';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4bmltcnJ6dmhuaWppdXNvanFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3OTE0NTksImV4cCI6MjA4NjM2NzQ1OX0.nlXsW77m4BWVJYYjvaOiIwD8DAwBL3pB-jvGzyDmvBk';
 
 export const supabase = {
     auth: {
@@ -68,7 +68,13 @@ export const supabase = {
     from: (table) => {
         const getAuthHeader = () => {
             const session = localStorage.getItem('sb-auth-token');
-            return session ? `Bearer ${JSON.parse(session).access_token}` : `Bearer ${SUPABASE_ANON_KEY}`;
+            if (!session) return `Bearer ${SUPABASE_ANON_KEY}`;
+            try {
+                const parsed = JSON.parse(session);
+                return parsed.access_token ? `Bearer ${parsed.access_token}` : `Bearer ${SUPABASE_ANON_KEY}`;
+            } catch (e) {
+                return `Bearer ${SUPABASE_ANON_KEY}`;
+            }
         };
 
         const headers = {
