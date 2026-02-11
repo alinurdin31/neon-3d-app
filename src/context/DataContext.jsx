@@ -181,8 +181,8 @@ export const DataProvider = ({ children }) => {
             payment_method: paymentDetails.method,
             status: 'completed'
         };
-        const { data: saleData } = await supabase.from('sales').insert(salePayload);
-        const realSaleId = saleData[0]?.id;
+        const { data: saleData } = await supabase.from('sales').insert(salePayload).select();
+        const realSaleId = saleData?.[0]?.id;
 
         // 2. Sale Items
         const saleItems = cart.map(item => ({
