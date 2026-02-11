@@ -1,5 +1,5 @@
-const SUPABASE_URL = 'https://spznesttxigtwlymvxfr.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_BVZ6vSwPTPQnJlIR-5LMHg_5jeKhbPI';
+const SUPABASE_URL = 'https://ixnimrrzvhnijiusojqr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_ActbYxPQVWJmW8Qf_emvqw__E1zcxuV';
 
 export const supabase = {
     auth: {

@@ -34,7 +34,17 @@ export const DataProvider = ({ children }) => {
         { id: 2, name: 'PT. Teknologi Maju', phone: '021-999-888', address: 'Kawasan Industri Pulo Gadung' },
     ];
 
+    // --- State ---
     const [user, setUser] = useState(null);
+    const [products, setProducts] = useState([]);
+    const [transactions, setTransactions] = useState([]);
+    const [journal, setJournal] = useState([]);
+    const [employees, setEmployees] = useState([]);
+    const [accounts, setAccounts] = useState([]);
+    const [settings, setSettings] = useState(initialSettings);
+    const [customers, setCustomers] = useState([]);
+    const [jobs, setJobs] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     // --- Sync from Supabase ---
     const fetchAllData = async () => {
