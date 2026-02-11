@@ -26,12 +26,9 @@ const POS = () => {
     );
 
     const addToCart = (product) => {
-        if (product.stock <= 0) return;
-
         setCart(current => {
             const existing = current.find(item => item.id === product.id);
             if (existing) {
-                if (existing.quantity >= product.stock) return current;
                 return current.map(item =>
                     item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
                 );
@@ -45,7 +42,6 @@ const POS = () => {
             if (item.id === id) {
                 const product = products.find(p => p.id === id);
                 const newQuantity = item.quantity + change;
-                if (newQuantity > product.stock) return item;
                 return { ...item, quantity: Math.max(0, newQuantity) };
             }
             return item;
@@ -109,15 +105,13 @@ const POS = () => {
                     {filteredProducts.map(product => (
                         <motion.div
                             whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            key={product.id}
                             onClick={() => addToCart(product)}
-                            className={`bg-white/5 border border-white/10 rounded-xl p-4 cursor-pointer transition-all group ${product.stock <= 0 ? 'opacity-50 grayscale cursor-not-allowed' : 'hover:bg-white/10 hover:border-neon-cyan/50'}`}
+                            className={`bg-white/5 border border-white/10 rounded-xl p-4 cursor-pointer transition-all group hover:bg-white/10 hover:border-neon-cyan/50`}
                         >
                             <h3 className="font-bold text-white mb-1 truncate">{product.name}</h3>
                             <div className="flex justify-between text-sm mb-2">
                                 <span className="text-gray-400">{product.category}</span>
-                                <span className={`${product.stock < 10 ? 'text-yellow-500' : 'text-neon-green'}`}>Stok: {product.stock}</span>
+                                <span className={`${product.stock <= 0 ? 'text-red-500' : product.stock < 10 ? 'text-yellow-500' : 'text-neon-green'}`}>Stok: {product.stock}</span>
                             </div>
                             <p className="text-neon-cyan font-bold">{formatRupiah(product.price)}</p>
                         </motion.div>

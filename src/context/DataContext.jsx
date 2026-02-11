@@ -199,10 +199,10 @@ export const DataProvider = ({ children }) => {
         for (const item of cart) {
             const prod = products.find(p => p.id === item.id);
             if (prod) {
-                const newStock = Math.max(0, prod.stock - item.quantity);
+                const newStock = prod.stock - item.quantity;
                 await supabase.from('products').update({ id: item.id }, {
                     stock: newStock,
-                    status: newStock === 0 ? 'Habis' : newStock < 10 ? 'Stok Rendah' : 'Aktif'
+                    status: newStock <= 0 ? 'Habis' : newStock < 10 ? 'Stok Rendah' : 'Aktif'
                 });
             }
         }
@@ -237,7 +237,12 @@ export const DataProvider = ({ children }) => {
         });
 
         fetchAllData(); // Refresh UI
-        return txId;
+    };
+
+    const getSaleDetails = async (saleId) => {
+        const { data: sale } = await supabase.from('sales').select('*').match({ id: saleId }).single();
+        const { data: items } = await supabase.from('sale_items').select('*').match({ sale_id: saleId });
+        return { ...sale, items: items || [] };
     };
 
     const paySalary = async (employeeId) => {
@@ -384,6 +389,7 @@ export const DataProvider = ({ children }) => {
     const logout = async () => {
         if (window.confirm("Apakah Anda yakin ingin logout?")) {
             await supabase.auth.signOut();
+            setUser(null);
         }
     };
 
@@ -559,7 +565,7 @@ export const DataProvider = ({ children }) => {
         <DataContext.Provider value={{
             products, transactions, journal, employees, accounts, settings, customers, jobs, loading, user,
             processSale, paySalary, restockProduct, addJournalEntry, clearAllData, logout,
-            seedInitialCOA, seedInitialProducts, importProducts,
+            seedInitialCOA, seedInitialProducts, importProducts, getSaleDetails,
             addProduct, updateProduct, deleteProduct,
             addEmployee, updateEmployee, deleteEmployee,
             addCustomer, updateCustomer, deleteCustomer,

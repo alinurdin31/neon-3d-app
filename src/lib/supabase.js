@@ -61,7 +61,6 @@ export const supabase = {
                 console.error('Logout error:', e);
             }
             localStorage.removeItem('sb-auth-token');
-            window.location.href = '/login';
         }
     },
     storage: {

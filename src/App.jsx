@@ -18,6 +18,7 @@ import Pekerjaan from './pages/Pekerjaan';
 import Pengaturan from './pages/Pengaturan';
 import PrintPage from './pages/PrintPage';
 import Login from './pages/Login';
+import Riwayat from './pages/Riwayat';
 import { useData } from './context/DataContext';
 import { supabase } from './lib/supabase';
 
@@ -52,6 +53,7 @@ const AnimatedRoutes = ({ user }) => {
         <Route path="/coa" element={user ? <PageWrapper><COA /></PageWrapper> : <Navigate to="/login" />} />
         <Route path="/pelanggan" element={user ? <PageWrapper><Pelanggan /></PageWrapper> : <Navigate to="/login" />} />
         <Route path="/pekerjaan" element={user ? <PageWrapper><Pekerjaan /></PageWrapper> : <Navigate to="/login" />} />
+        <Route path="/riwayat" element={user ? <PageWrapper><Riwayat /></PageWrapper> : <Navigate to="/login" />} />
         <Route path="/pengaturan" element={user ? <PageWrapper><Pengaturan /></PageWrapper> : <Navigate to="/login" />} />
 
         {/* Catch All */}

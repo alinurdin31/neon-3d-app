@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
     LayoutDashboard, ShoppingCart, Package, Boxes, FileText,
     BookOpen, DollarSign, TrendingDown, ClipboardList, Import,
-    Settings, Users, Briefcase, List, LogOut
+    Settings, Users, Briefcase, List, LogOut, History
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useData } from '../context/DataContext';
@@ -25,6 +25,7 @@ const Sidebar = () => {
                 { path: '/produk', name: 'Produk', icon: Package },
                 { path: '/stok', name: 'Stok', icon: Boxes },
                 { path: '/pelanggan', name: 'Pelanggan', icon: Users },
+                { path: '/riwayat', name: 'Riwayat Penjualan', icon: History },
                 { path: '/impor', name: 'Impor Data', icon: Import },
             ]
         },
