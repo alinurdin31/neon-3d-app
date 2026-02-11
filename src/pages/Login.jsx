@@ -19,7 +19,7 @@ const Login = () => {
         const { data, error } = await supabase.auth.signIn({ email, password });
 
         if (error) {
-            setError(error.error_description || error.message || 'Login gagal. Periksa kembali email dan password Anda.');
+            setError(error.error_description || error.msg || error.message || 'Login gagal. Periksa kembali email dan password Anda.');
             setLoading(false);
         } else {
             // Use window.location.href for a clean, full-app reset and direct navigation

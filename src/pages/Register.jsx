@@ -25,7 +25,7 @@ const Register = () => {
         });
 
         if (error) {
-            setError(error.message || 'Pendaftaran gagal. Pastikan email belum terdaftar.');
+            setError(error.msg || error.message || error.error_description || 'Pendaftaran gagal. Pastikan email belum terdaftar atau periksa koneksi.');
             setLoading(false);
         } else {
             setSuccess(true);
