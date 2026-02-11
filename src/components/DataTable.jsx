@@ -9,7 +9,8 @@ const DataTable = ({
     onAdd,
     onEdit,
     onDelete,
-    searchPlaceholder = "Cari data..."
+    searchPlaceholder = "Cari data...",
+    customActions
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -44,6 +45,8 @@ const DataTable = ({
                             className="w-full bg-black/30 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-neon-cyan"
                         />
                     </div>
+
+                    {customActions}
 
                     {onAdd && (
                         <motion.button

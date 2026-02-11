@@ -16,10 +16,6 @@ export const DataProvider = ({ children }) => {
         { id: 106, name: 'Lampu Neon Strip X1', category: 'Pencahayaan', stock: 100, price: 250000, cost: 100000, status: 'Aktif' },
     ];
 
-    const initialEmployees = [
-        { id: 1, name: 'Alice Cyber', role: 'Manajer Toko', salary: 4500000, status: 'Menunggu', joinDate: '2023-01-15', phone: '081234567890' },
-        { id: 2, name: 'Bob Nexus', role: 'Sales Associate', salary: 3200000, status: 'Menunggu', joinDate: '2023-03-10', phone: '089876543210' },
-    ];
 
     const initialSettings = {
         name: 'Neon 3D Store',
@@ -29,10 +25,6 @@ export const DataProvider = ({ children }) => {
         logoOp: 1,
     };
 
-    const initialCustomers = [
-        { id: 1, name: 'Pelanggan Umum', phone: '-', address: '-' },
-        { id: 2, name: 'PT. Teknologi Maju', phone: '021-999-888', address: 'Kawasan Industri Pulo Gadung' },
-    ];
 
     const initialAccounts = [
         // 1XXX: ASET
@@ -126,7 +118,7 @@ export const DataProvider = ({ children }) => {
             const currentP = Array.isArray(p) ? p : [];
             setProducts(currentP.map(x => ({ ...x, cost: Number(x.cost_price || x.cost), imageUrl: x.image_url })));
 
-            const currentE = Array.isArray(e) && e.length > 0 ? e : initialEmployees;
+            const currentE = Array.isArray(e) ? e : [];
             setEmployees(currentE.map(x => ({ ...x, joinDate: x.join_date || x.joinDate })));
 
             setCustomers(Array.isArray(c) ? c : []);
@@ -395,6 +387,30 @@ export const DataProvider = ({ children }) => {
         }
     };
 
+    const importProducts = async (productsList) => {
+        setLoading(true);
+        try {
+            const formatted = productsList.map(p => ({
+                name: p.name,
+                category: p.category,
+                price: Number(p.price),
+                cost_price: Number(p.cost),
+                stock: 0, // Forced to 0 as requested
+                status: 'Aktif'
+            }));
+
+            await supabase.from('products').insert(formatted);
+            fetchAllData();
+            return true;
+        } catch (error) {
+            console.error("Import Products Error:", error);
+            alert("Gagal meng-import produk.");
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // CRUDs with Supabase Sync
     const addProduct = async (p) => {
         await supabase.from('products').insert({
@@ -543,7 +559,7 @@ export const DataProvider = ({ children }) => {
         <DataContext.Provider value={{
             products, transactions, journal, employees, accounts, settings, customers, jobs, loading, user,
             processSale, paySalary, restockProduct, addJournalEntry, clearAllData, logout,
-            seedInitialCOA, seedInitialProducts,
+            seedInitialCOA, seedInitialProducts, importProducts,
             addProduct, updateProduct, deleteProduct,
             addEmployee, updateEmployee, deleteEmployee,
             addCustomer, updateCustomer, deleteCustomer,

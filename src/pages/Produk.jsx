@@ -1,21 +1,24 @@
 import React, { useState } from 'react';
-import { Archive, Plus, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Archive, Plus, Edit, Trash2, Image as ImageIcon, FileSpreadsheet } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { supabase } from '../lib/supabase';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 
 const Produk = () => {
-    const { products, addProduct, updateProduct, deleteProduct, restockProduct } = useData();
+    const { products, addProduct, updateProduct, deleteProduct, restockProduct, importProducts } = useData();
 
     // Modal States
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
     const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     // Forms
     const [productForm, setProductForm] = useState({ name: '', category: '', price: 0, cost: 0, stock: 0, imageUrl: '' });
     const [editingId, setEditingId] = useState(null);
     const [restockForm, setRestockForm] = useState({ id: null, name: '', qty: 1, cost: 0, method: '1101' });
+    const [importText, setImportText] = useState('');
+    const [importPreview, setImportPreview] = useState([]);
 
     // Formatters
     const formatRupiah = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
@@ -144,6 +147,33 @@ const Produk = () => {
         setIsRestockModalOpen(false);
     };
 
+    const handleImportTextChange = (text) => {
+        setImportText(text);
+        const rows = text.trim().split('\n');
+        const parsed = rows.map(row => {
+            const cols = row.split('\t');
+            if (cols.length < 2) return null;
+            return {
+                name: cols[0]?.trim(),
+                category: cols[1]?.trim() || 'Umum',
+                cost: Number(cols[2]?.replace(/[^0-9]/g, '') || 0),
+                price: Number(cols[3]?.replace(/[^0-9]/g, '') || 0),
+                stock: 0 // Forced 0 as requested
+            };
+        }).filter(r => r && r.name && r.name.toLowerCase() !== 'nama produk');
+        setImportPreview(parsed);
+    };
+
+    const handleImportSubmit = async () => {
+        if (importPreview.length === 0) return;
+        const success = await importProducts(importPreview);
+        if (success) {
+            setIsImportModalOpen(false);
+            setImportText('');
+            setImportPreview([]);
+        }
+    };
+
     return (
         <div className="space-y-6">
             <DataTable
@@ -152,6 +182,14 @@ const Produk = () => {
                 data={products}
                 onAdd={() => openProductModal()}
                 searchPlaceholder="Cari nama atau kategori..."
+                customActions={
+                    <button
+                        onClick={() => setIsImportModalOpen(true)}
+                        className="bg-neon-cyan/20 border border-neon-cyan/50 px-4 py-2 rounded-lg text-neon-cyan font-bold flex items-center gap-2 hover:bg-neon-cyan/30 transition-all"
+                    >
+                        <FileSpreadsheet className="w-5 h-5" /> Import
+                    </button>
+                }
             />
 
             {/* Product Modal */}
@@ -329,6 +367,81 @@ const Produk = () => {
                         <button type="submit" className="px-6 py-2 bg-neon-green text-black font-bold rounded-lg hover:bg-green-400">Konfirmasi</button>
                     </div>
                 </form>
+            </Modal>
+            {/* Import Modal */}
+            <Modal
+                isOpen={isImportModalOpen}
+                onClose={() => { setIsImportModalOpen(false); setImportText(''); setImportPreview([]); }}
+                title="Import Produk (Excel Copy-Paste)"
+            >
+                <div className="space-y-6">
+                    <div className="bg-neon-cyan/5 border border-neon-cyan/10 p-4 rounded-xl">
+                        <h4 className="text-neon-cyan font-bold text-xs uppercase mb-2">Instruksi Copy-Paste</h4>
+                        <p className="text-gray-400 text-[10px] leading-relaxed">
+                            1. Siapkan tabel di Excel dengan urutan kolom: <br />
+                            <span className="text-white font-mono bg-white/5 px-2 py-0.5 rounded">Nama Produk | Kategori | Modal (HPP) | Harga Jual</span><br />
+                            2. Salin (Copy) baris data tersebut.<br />
+                            3. Tempel (Paste) ke area teks di bawah.<br />
+                            4. Periksa pratinjau. <span className="text-yellow-500 font-bold">Stok akan otomatis diatur ke 0.</span>
+                        </p>
+                    </div>
+
+                    <div>
+                        <textarea
+                            value={importText}
+                            onChange={(e) => handleImportTextChange(e.target.value)}
+                            className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-neon-cyan h-32 text-xs font-mono"
+                            placeholder="Tempel data di sini (Tab separated)..."
+                        />
+                    </div>
+
+                    {importPreview.length > 0 && (
+                        <div className="space-y-3">
+                            <h4 className="text-white font-bold text-sm">Pratinjau ({importPreview.length} Produk)</h4>
+                            <div className="max-h-60 overflow-y-auto border border-white/5 rounded-lg bg-black/20">
+                                <table className="w-full text-left text-[10px]">
+                                    <thead className="bg-white/5 text-gray-500 sticky top-0">
+                                        <tr>
+                                            <th className="p-2">Nama</th>
+                                            <th className="p-2">Kategori</th>
+                                            <th className="p-2">HPP</th>
+                                            <th className="p-2">Harga</th>
+                                            <th className="p-2 text-yellow-500">Stok</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5">
+                                        {importPreview.map((item, idx) => (
+                                            <tr key={idx} className="text-gray-300">
+                                                <td className="p-2 truncate max-w-[100px]">{item.name}</td>
+                                                <td className="p-2">{item.category}</td>
+                                                <td className="p-2">{formatRupiah(item.cost)}</td>
+                                                <td className="p-2">{formatRupiah(item.price)}</td>
+                                                <td className="p-2 text-yellow-500 font-bold">{item.stock}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex justify-end gap-3 pt-4">
+                        <button
+                            type="button"
+                            onClick={() => { setIsImportModalOpen(false); setImportText(''); setImportPreview([]); }}
+                            className="px-4 py-2 text-gray-400 hover:text-white"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            onClick={handleImportSubmit}
+                            disabled={importPreview.length === 0}
+                            className="px-6 py-2 bg-neon-cyan text-black font-bold rounded-lg hover:bg-cyan-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        >
+                            Import {importPreview.length} Produk
+                        </button>
+                    </div>
+                </div>
             </Modal>
         </div >
     );
