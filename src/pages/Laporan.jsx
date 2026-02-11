@@ -1,83 +1,191 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import { PieChart, BarChart, FileText, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
 const Laporan = () => {
-    const { transactions, journal } = useData();
+    const { journal, accounts } = useData();
+    const [activeTab, setActiveTab] = useState('labarugi'); // 'labarugi' or 'neraca'
+
     const formatRupiah = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number);
 
-    // Calculate totals from Journal
-    // Revenue = Credit on 401
-    // Expense = Debit on 5xx, 6xx
+    // Calculate details per account
+    const accountBalances = useMemo(() => {
+        const balances = {};
 
-    let revenue = 0;
-    let expenses = 0;
+        // Initialize with 0
+        accounts.forEach(acc => {
+            balances[acc.code] = { ...acc, balance: 0 };
+        });
 
-    journal.forEach(entry => {
-        entry.lines.forEach(line => {
-            if (line.code.startsWith('4')) { // Revenue
-                revenue += line.credit;
-            }
-            if (line.code.startsWith('5') || line.code.startsWith('6')) { // Expenses
-                expenses += line.debit;
+        // Sum journal entries
+        journal.forEach(entry => {
+            entry.lines.forEach(line => {
+                if (balances[line.code]) {
+                    if (['Asset', 'Expense'].includes(balances[line.code].type)) {
+                        balances[line.code].balance += (line.debit - line.credit);
+                    } else {
+                        balances[line.code].balance += (line.credit - line.debit);
+                    }
+                }
+            });
+        });
+
+        return balances;
+    }, [journal, accounts]);
+
+    // Financial Statements Data
+    const financialData = useMemo(() => {
+        const data = {
+            revenue: { accounts: [], total: 0 },
+            expense: { accounts: [], total: 0 },
+            asset: { accounts: [], total: 0 },
+            liability: { accounts: [], total: 0 },
+            equity: { accounts: [], total: 0 },
+            netIncome: 0
+        };
+
+        Object.values(accountBalances).forEach(acc => {
+            if (acc.type === 'Revenue') {
+                data.revenue.accounts.push(acc);
+                data.revenue.total += acc.balance;
+            } else if (acc.type === 'Expense') {
+                data.expense.accounts.push(acc);
+                data.expense.total += acc.balance;
+            } else if (acc.type === 'Asset') {
+                data.asset.accounts.push(acc);
+                data.asset.total += acc.balance;
+            } else if (acc.type === 'Liability') {
+                data.liability.accounts.push(acc);
+                data.liability.total += acc.balance;
+            } else if (acc.type === 'Equity') {
+                data.equity.accounts.push(acc);
+                data.equity.total += acc.balance;
             }
         });
-    });
 
-    const profit = revenue - expenses;
+        data.netIncome = data.revenue.total - data.expense.total;
+
+        // Add Net Income to Equity (Retained Earnings)
+        data.equity.total += data.netIncome;
+
+        return data;
+    }, [accountBalances]);
+
+    const ReportRow = ({ label, value, isHeader = false, isTotal = false, indent = false }) => (
+        <div className={`flex justify-between py-2 ${isHeader ? 'border-b border-white/20 font-bold text-white mt-4' : 'border-b border-white/5'} ${isTotal ? 'font-bold text-white border-t border-white/20 bg-white/5 px-2 mt-1' : 'text-gray-400'} ${indent ? 'pl-6' : ''}`}>
+            <span>{label}</span>
+            <span>{formatRupiah(value)}</span>
+        </div>
+    );
 
     return (
-        <div className="space-y-8">
-            <header>
-                <h1 className="text-3xl font-bold neon-text text-white mb-2">Laporan Keuangan</h1>
-                <p className="text-gray-400">Ringkasan Laba & Rugi Real-time</p>
+        <div className="space-y-6 h-full flex flex-col">
+            <header className="flex justify-between items-end">
+                <div>
+                    <h1 className="text-3xl font-bold neon-text text-white mb-2">Laporan Keuangan</h1>
+                    <p className="text-gray-400">Analisis kinerja bisnis dan posisi keuangan</p>
+                </div>
+                <div className="flex bg-black/40 rounded-lg p-1 border border-white/10">
+                    <button
+                        onClick={() => setActiveTab('labarugi')}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'labarugi' ? 'bg-neon-cyan text-black shadow-lg' : 'text-gray-400 hover:text-white'}`}
+                    >
+                        <TrendingUp className="w-4 h-4" /> Laba Rugi
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('neraca')}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'neraca' ? 'bg-neon-purple text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+                    >
+                        <FileText className="w-4 h-4" /> Neraca (Balance Sheet)
+                    </button>
+                </div>
             </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="glass-card p-6 border-t-4 border-neon-green">
-                    <h3 className="text-gray-400 font-medium mb-1">Total Pendapatan</h3>
-                    <p className="text-3xl font-bold text-white">{formatRupiah(revenue)}</p>
-                </div>
-                <div className="glass-card p-6 border-t-4 border-neon-pink">
-                    <h3 className="text-gray-400 font-medium mb-1">Total Pengeluaran</h3>
-                    <p className="text-3xl font-bold text-white">{formatRupiah(expenses)}</p>
-                </div>
-                <div className="glass-card p-6 border-t-4 border-neon-cyan relative overflow-hidden">
-                    <div className="absolute inset-0 bg-neon-cyan/5"></div>
-                    <h3 className="text-gray-400 font-medium mb-1 relative z-10">Laba Bersih</h3>
-                    <p className="text-3xl font-bold text-white relative z-10">{formatRupiah(profit)}</p>
-                </div>
-            </div>
+            <div className="flex-1 overflow-auto custom-scrollbar">
+                {activeTab === 'labarugi' ? (
+                    <div className="max-w-4xl mx-auto space-y-6">
+                        {/* Summary Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="glass-card p-6 border-t-4 border-neon-green">
+                                <h3 className="text-gray-400 font-medium mb-1">Total Pendapatan</h3>
+                                <p className="text-2xl font-bold text-white">{formatRupiah(financialData.revenue.total)}</p>
+                            </div>
+                            <div className="glass-card p-6 border-t-4 border-neon-pink">
+                                <h3 className="text-gray-400 font-medium mb-1">Total Beban</h3>
+                                <p className="text-2xl font-bold text-white">{formatRupiah(financialData.expense.total)}</p>
+                            </div>
+                            <div className="glass-card p-6 border-t-4 border-neon-cyan relative overflow-hidden">
+                                <div className="absolute inset-0 bg-neon-cyan/5"></div>
+                                <h3 className="text-gray-400 font-medium mb-1 relative z-10">Laba Bersih (Net Income)</h3>
+                                <p className={`text-2xl font-bold relative z-10 ${financialData.netIncome >= 0 ? 'text-neon-cyan' : 'text-red-500'}`}>{formatRupiah(financialData.netIncome)}</p>
+                            </div>
+                        </div>
 
-            <div className="glass-card p-6">
-                <h2 className="text-xl font-bold text-white mb-6">Detail Transaksi Keuangan</h2>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left min-w-[600px]">
-                        <thead>
-                            <tr className="border-b border-white/10 text-gray-400 uppercase text-sm">
-                                <th className="py-3 px-2">Tanggal</th>
-                                <th className="py-3 px-2">Keterangan</th>
-                                <th className="py-3 px-2 text-right">Debit (Masuk)</th>
-                                <th className="py-3 px-2 text-right">Kredit (Keluar)</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/5">
-                            {journal.slice(0, 10).map((entry, idx) => {
-                                const debitTotal = entry.lines.reduce((sum, l) => sum + l.debit, 0);
-                                const creditTotal = entry.lines.reduce((sum, l) => sum + l.credit, 0);
-                                return (
-                                    <tr key={idx} className="hover:bg-white/5 transition-colors">
-                                        <td className="py-3 px-2 text-gray-300">{entry.date}</td>
-                                        <td className="py-3 px-2 text-white font-medium">
-                                            {entry.desc} <span className="text-neon-purple text-xs ml-2">#{entry.id}</span>
-                                        </td>
-                                        <td className="py-3 px-2 text-right text-neon-green font-mono">{formatRupiah(debitTotal)}</td>
-                                        <td className="py-3 px-2 text-right text-neon-pink font-mono">{formatRupiah(creditTotal)}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
+                        {/* Detailed Report */}
+                        <div className="glass-card p-8">
+                            <h2 className="text-center text-xl font-bold text-white mb-6 uppercase tracking-wider border-b border-white/10 pb-4">Laporan Laba Rugi</h2>
+
+                            <ReportRow label="PENDAPATAN (REVENUE)" isHeader />
+                            {financialData.revenue.accounts.map(acc => (
+                                <ReportRow key={acc.code} label={`${acc.code} - ${acc.name}`} value={acc.balance} indent />
+                            ))}
+                            <ReportRow label="Total Pendapatan" value={financialData.revenue.total} isTotal />
+
+                            <ReportRow label="BEBAN & PENGELUARAN (EXPENSES)" isHeader />
+                            {financialData.expense.accounts.map(acc => (
+                                <ReportRow key={acc.code} label={`${acc.code} - ${acc.name}`} value={acc.balance} indent />
+                            ))}
+                            <ReportRow label="Total Beban" value={financialData.expense.total} isTotal />
+
+                            <div className="mt-8 pt-4 border-t-2 border-white/20 flex justify-between items-center bg-neon-cyan/10 p-4 rounded-lg">
+                                <span className="text-lg font-bold text-white uppercase">Laba Bersih (Net Income)</span>
+                                <span className={`text-2xl font-bold ${financialData.netIncome >= 0 ? 'text-neon-cyan' : 'text-red-500'}`}>{formatRupiah(financialData.netIncome)}</span>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="max-w-4xl mx-auto space-y-6">
+                        {/* Balance Check */}
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="glass-card p-6 border-t-4 border-neon-blue">
+                                <h3 className="text-gray-400 font-medium mb-1">Total Aset</h3>
+                                <p className="text-2xl font-bold text-white">{formatRupiah(financialData.asset.total)}</p>
+                            </div>
+                            <div className="glass-card p-6 border-t-4 border-neon-purple">
+                                <h3 className="text-gray-400 font-medium mb-1">Total Kewajiban & Ekuitas</h3>
+                                <p className="text-2xl font-bold text-white">{formatRupiah(financialData.liability.total + financialData.equity.total)}</p>
+                            </div>
+                        </div>
+
+                        <div className="glass-card p-8">
+                            <h2 className="text-center text-xl font-bold text-white mb-6 uppercase tracking-wider border-b border-white/10 pb-4">Neraca (Balance Sheet)</h2>
+
+                            <ReportRow label="ASET (ASSETS)" isHeader />
+                            {financialData.asset.accounts.map(acc => (
+                                <ReportRow key={acc.code} label={`${acc.code} - ${acc.name}`} value={acc.balance} indent />
+                            ))}
+                            <ReportRow label="Total Aset" value={financialData.asset.total} isTotal />
+
+                            <ReportRow label="KEWAJIBAN (LIABILITIES)" isHeader />
+                            {financialData.liability.accounts.map(acc => (
+                                <ReportRow key={acc.code} label={`${acc.code} - ${acc.name}`} value={acc.balance} indent />
+                            ))}
+                            <ReportRow label="Total Kewajiban" value={financialData.liability.total} isTotal />
+
+                            <ReportRow label="EKUITAS (EQUITY)" isHeader />
+                            {financialData.equity.accounts.map(acc => (
+                                <ReportRow key={acc.code} label={`${acc.code} - ${acc.name}`} value={acc.balance} indent />
+                            ))}
+                            <ReportRow label="Laba Bersih Tahun Berjalan" value={financialData.netIncome} indent />
+                            <ReportRow label="Total Ekuitas" value={financialData.equity.total} isTotal />
+
+                            <div className="mt-8 pt-4 border-t-2 border-white/20 flex justify-between items-center">
+                                <div className="text-gray-400 font-medium uppercase">Total Kewajiban + Ekuitas</div>
+                                <div className="text-xl font-bold text-white">{formatRupiah(financialData.liability.total + financialData.equity.total)}</div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
