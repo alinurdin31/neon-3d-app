@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Save, Store, MapPin, Phone, Mail, Image, Settings } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { supabase } from '../lib/supabase';
 
 const Pengaturan = () => {
     const { settings, updateSettings, clearAllData } = useData();
@@ -98,8 +99,8 @@ const Pengaturan = () => {
                                     key={op}
                                     onClick={() => setFormData({ ...formData, logoOp: op })}
                                     className={`relative border-2 rounded-xl p-4 flex flex-col items-center justify-center aspect-square transition-all group ${formData.logoOp === op
-                                            ? 'border-neon-purple bg-neon-purple/10 shadow-[0_0_15px_rgba(188,19,254,0.3)]'
-                                            : 'border-white/10 hover:bg-white/5 hover:border-white/30'
+                                        ? 'border-neon-purple bg-neon-purple/10 shadow-[0_0_15px_rgba(188,19,254,0.3)]'
+                                        : 'border-white/10 hover:bg-white/5 hover:border-white/30'
                                         }`}
                                 >
                                     {op === 1 && <div className="text-3xl font-bold font-neon text-neon-cyan group-hover:scale-110 transition-transform">N3D</div>}
@@ -116,14 +117,63 @@ const Pengaturan = () => {
                             <p>Info: Perubahan logo dan identitas akan langsung diterapkan pada semua dokumen cetak (Struk Penjualan, Slip Gaji, Laporan).</p>
                         </div>
                     </div>
+
+                    {/* Stamp Upload Section */}
+                    <div className="md:col-span-2 mt-4 space-y-4">
+                        <label className="block text-gray-400 text-sm mb-2 flex items-center gap-2">
+                            <Image className="w-4 h-4 text-neon-cyan" /> Stempel Toko (PNG/JPG)
+                        </label>
+                        <div className="flex items-center gap-6 p-6 bg-black/40 border border-white/10 rounded-xl relative overflow-hidden group">
+                            <div className="w-24 h-24 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden relative">
+                                {formData.stampUrl ? (
+                                    <img src={formData.stampUrl} alt="Stamp" className="w-full h-full object-contain" />
+                                ) : (
+                                    <div className="text-gray-600 uppercase text-[10px] font-bold">No Stamp</div>
+                                )}
+                            </div>
+
+                            <div className="flex-1 space-y-2">
+                                <p className="text-xs text-gray-400">Gunakan stempel transparan (PNG) untuk hasil terbaik pada struk digital.</p>
+                                <input
+                                    type="file"
+                                    id="stamp-upload"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                        const file = e.target.files[0];
+                                        if (!file) return;
+
+                                        const fileExt = file.name.split('.').pop();
+                                        const fileName = `stamp_${Date.now()}.${fileExt}`;
+                                        const filePath = `settings/${fileName}`;
+
+                                        const { error } = await supabase.storage.from('media').upload(filePath, file);
+                                        if (error) {
+                                            alert('Gagal upload stempel: ' + (error.message || error.error));
+                                            return;
+                                        }
+
+                                        const { data: publicData } = supabase.storage.from('media').getPublicUrl(filePath);
+                                        setFormData({ ...formData, stampUrl: publicData.publicUrl });
+                                    }}
+                                />
+                                <label
+                                    htmlFor="stamp-upload"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-white hover:bg-white/10 cursor-pointer transition-all"
+                                >
+                                    Pilih File Stempel
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="mt-8 pt-6 border-t border-white/10 flex justify-end">
                     <button
                         onClick={handleSave}
                         className={`flex items-center gap-2 px-8 py-3 rounded-lg font-bold text-white transition-all shadow-lg hover:shadow-xl active:scale-95 ${saved
-                                ? 'bg-green-500 shadow-green-500/30 ring-2 ring-green-400'
-                                : 'bg-gradient-to-r from-neon-cyan to-blue-500 shadow-neon-cyan/30 hover:brightness-110'
+                            ? 'bg-green-500 shadow-green-500/30 ring-2 ring-green-400'
+                            : 'bg-gradient-to-r from-neon-cyan to-blue-500 shadow-neon-cyan/30 hover:brightness-110'
                             }`}
                     >
                         <Save className={`w-5 h-5 ${saved ? 'animate-bounce' : ''}`} />

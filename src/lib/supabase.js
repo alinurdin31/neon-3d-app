@@ -64,6 +64,32 @@ export const supabase = {
             window.location.href = '/login';
         }
     },
+    storage: {
+        from: (bucket) => ({
+            upload: async (path, file) => {
+                const session = localStorage.getItem('sb-auth-token');
+                const token = session ? JSON.parse(session).access_token : SUPABASE_ANON_KEY;
+
+                const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: file
+                });
+                const data = await res.json();
+                return { data, error: res.ok ? null : data };
+            },
+            getPublicUrl: (path) => {
+                return {
+                    data: {
+                        publicUrl: `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`
+                    }
+                };
+            }
+        })
+    },
 
     from: (table) => {
         const getAuthHeader = () => {
@@ -107,13 +133,20 @@ export const supabase = {
                 });
                 return { data: await res.json(), error: res.ok ? null : true };
             },
-            delete: async (match) => {
+            delete: async (match = {}) => {
                 let queryParams = '';
                 if (Object.keys(match).length === 0) {
-                    // To delete all rows, we need a filter. id != -1 is safe for auto-incrementing IDs.
+                    // For a global delete, we use a filter that typically matches everything
+                    // PostgREST requires at least one filter for DELETE
+                    // We'll try to find a column to filter on, or default to a common one
                     queryParams = 'id=neq.-1';
                 } else {
-                    queryParams = Object.keys(match).map(k => `${k}=eq.${match[k]}`).join('&');
+                    queryParams = Object.keys(match).map(k => {
+                        const val = match[k];
+                        if (val === null) return `${k}=is.null`;
+                        if (typeof val === 'string' && val.includes('.')) return `${k}=${val}`;
+                        return `${k}=eq.${val}`;
+                    }).join('&');
                 }
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${queryParams}`, {
                     method: 'DELETE',

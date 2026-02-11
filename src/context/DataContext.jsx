@@ -123,12 +123,12 @@ export const DataProvider = ({ children }) => {
                 console.log('Seeding initial settings...');
                 await updateSettings(initialSettings);
             } else if (Array.isArray(s) && s.length > 0) {
-                setSettings({ ...s[0], logoOp: s[0].logo_op });
+                setSettings({ ...s[0], logoOp: s[0].logo_op, stampUrl: s[0].stamp_url });
             }
 
             // Map and Set for the rest
             const currentP = Array.isArray(p) && p.length > 0 ? p : initialProducts;
-            setProducts(currentP.map(x => ({ ...x, cost: Number(x.cost_price || x.cost) })));
+            setProducts(currentP.map(x => ({ ...x, cost: Number(x.cost_price || x.cost), imageUrl: x.image_url })));
 
             const currentE = Array.isArray(e) && e.length > 0 ? e : initialEmployees;
             setEmployees(currentE.map(x => ({ ...x, joinDate: x.join_date || x.joinDate })));
@@ -340,7 +340,14 @@ export const DataProvider = ({ children }) => {
             ];
 
             for (const t of tables) {
-                await supabase.from(t).delete({});
+                // Specialized deletion for tables without 'id' column
+                if (t === 'chart_of_accounts') {
+                    await supabase.from(t).delete({ code: 'neq.0000' });
+                } else if (t === 'app_settings') {
+                    await supabase.from(t).delete({ id: 'eq.1' });
+                } else {
+                    await supabase.from(t).delete({});
+                }
             }
 
             // Re-seed with initial data
@@ -370,10 +377,7 @@ export const DataProvider = ({ children }) => {
             })));
 
             // 5. Default Settings
-            await supabase.from('app_settings').upsert({
-                id: 1, // Only one record
-                ...initialSettings
-            });
+            await updateSettings(initialSettings);
 
             window.location.reload();
         } catch (error) {
@@ -397,7 +401,8 @@ export const DataProvider = ({ children }) => {
             price: p.price,
             cost_price: p.cost,
             stock: p.stock,
-            status: p.status
+            status: p.status,
+            image_url: p.imageUrl
         });
         fetchAllData();
     };
@@ -409,7 +414,8 @@ export const DataProvider = ({ children }) => {
             price: p.price,
             cost_price: p.cost,
             stock: p.stock,
-            status: p.status
+            status: p.status,
+            image_url: p.imageUrl
         });
         fetchAllData();
     };
@@ -525,7 +531,8 @@ export const DataProvider = ({ children }) => {
             address: s.address,
             phone: s.phone,
             email: s.email,
-            logo_op: s.logoOp
+            logo_op: s.logoOp,
+            stamp_url: s.stampUrl
         });
         fetchAllData();
     };

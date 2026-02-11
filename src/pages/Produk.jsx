@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Archive, Plus, Edit, Trash2 } from 'lucide-react';
+import { Archive, Plus, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { supabase } from '../lib/supabase';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 
@@ -12,7 +12,7 @@ const Produk = () => {
     const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
 
     // Forms
-    const [productForm, setProductForm] = useState({ name: '', category: '', price: 0, cost: 0, stock: 0 });
+    const [productForm, setProductForm] = useState({ name: '', category: '', price: 0, cost: 0, stock: 0, imageUrl: '' });
     const [editingId, setEditingId] = useState(null);
     const [restockForm, setRestockForm] = useState({ id: null, name: '', qty: 1, cost: 0, method: '1-1100' });
 
@@ -22,12 +22,21 @@ const Produk = () => {
     // Columns Configuration
     const columns = [
         {
-            header: 'Nama Produk',
+            header: 'Produk',
             accessor: 'name',
             render: (prod) => (
-                <div>
-                    <div className="font-bold text-white">{prod.name}</div>
-                    <div className="text-xs text-gray-500">ID: {prod.id}</div>
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {prod.imageUrl ? (
+                            <img src={prod.imageUrl} alt={prod.name} className="w-full h-full object-cover" />
+                        ) : (
+                            <ImageIcon className="w-5 h-5 text-gray-600" />
+                        )}
+                    </div>
+                    <div>
+                        <div className="font-bold text-white">{prod.name}</div>
+                        <div className="text-xs text-gray-500">ID: {prod.id}</div>
+                    </div>
                 </div>
             )
         },
@@ -88,7 +97,7 @@ const Produk = () => {
             setProductForm({ ...prod });
         } else {
             setEditingId(null);
-            setProductForm({ name: '', category: '', price: 0, cost: 0, stock: 0 });
+            setProductForm({ name: '', category: '', price: 0, cost: 0, stock: 0, imageUrl: '' });
         }
         setIsProductModalOpen(true);
     };
@@ -161,6 +170,7 @@ const Produk = () => {
                             className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-neon-cyan"
                         />
                     </div>
+
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-gray-400 text-sm mb-2">Kategori</label>
@@ -183,6 +193,7 @@ const Produk = () => {
                             />
                         </div>
                     </div>
+
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-gray-400 text-sm mb-2">Harga Jual</label>
@@ -205,6 +216,52 @@ const Produk = () => {
                             />
                         </div>
                     </div>
+
+                    <div className="bg-white/5 p-4 rounded-lg border border-white/10">
+                        <label className="block text-gray-400 text-[10px] uppercase font-bold mb-3 tracking-wider">Foto Produk</label>
+                        <div className="flex items-center gap-4">
+                            <div className="w-20 h-20 rounded bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden">
+                                {productForm.imageUrl ? (
+                                    <img src={productForm.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                ) : (
+                                    <ImageIcon className="w-6 h-6 text-gray-700" />
+                                )}
+                            </div>
+                            <div className="flex-1 space-y-2">
+                                <input
+                                    type="file"
+                                    id="prod-image-upload"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                        const file = e.target.files[0];
+                                        if (!file) return;
+
+                                        const fileExt = file.name.split('.').pop();
+                                        const fileName = `prod_${Date.now()}.${fileExt}`;
+                                        const filePath = `products/${fileName}`;
+
+                                        const { error } = await supabase.storage.from('media').upload(filePath, file);
+                                        if (error) {
+                                            alert('Gagal upload foto: ' + (error.message || error.error));
+                                            return;
+                                        }
+
+                                        const { data: publicData } = supabase.storage.from('media').getPublicUrl(filePath);
+                                        setProductForm({ ...productForm, imageUrl: publicData.publicUrl });
+                                    }}
+                                />
+                                <label
+                                    htmlFor="prod-image-upload"
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-white hover:bg-white/10 cursor-pointer transition-all"
+                                >
+                                    Pilih Gambar
+                                </label>
+                                <p className="text-[10px] text-gray-500">Format: JPG, PNG, WEBP. Maks 2MB.</p>
+                            </div>
+                        </div>
+                    </div>
+
                     {!editingId && (
                         <p className="text-xs text-yellow-500 mt-2">* Stok awal pada 'Tambah Produk' tidak mencatat jurnal pembelian. Gunakan fitur 'Restock' untuk pembelian barang selanjutnya.</p>
                     )}
@@ -272,7 +329,7 @@ const Produk = () => {
                     </div>
                 </form>
             </Modal>
-        </div>
+        </div >
     );
 };
 

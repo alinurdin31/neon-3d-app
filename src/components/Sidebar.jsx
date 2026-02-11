@@ -9,13 +9,13 @@ import { motion } from 'framer-motion';
 import { useData } from '../context/DataContext';
 
 const Sidebar = () => {
-    const { logout, user } = useData();
+    const { logout, user, settings } = useData();
     const navGroups = [
         {
             title: 'UTAMA',
             items: [
                 { path: '/', name: 'Dashboard', icon: LayoutDashboard },
-                { path: '/pekerjaan', name: 'Pekerjaan (Jobs)', icon: Briefcase }, // New
+                { path: '/pekerjaan', name: 'Pekerjaan (Jobs)', icon: Briefcase },
             ]
         },
         {
@@ -24,7 +24,7 @@ const Sidebar = () => {
                 { path: '/pos', name: 'Kasir (POS)', icon: ShoppingCart },
                 { path: '/produk', name: 'Produk', icon: Package },
                 { path: '/stok', name: 'Stok', icon: Boxes },
-                { path: '/pelanggan', name: 'Pelanggan', icon: Users }, // New
+                { path: '/pelanggan', name: 'Pelanggan', icon: Users },
                 { path: '/impor', name: 'Impor Data', icon: Import },
             ]
         },
@@ -33,8 +33,8 @@ const Sidebar = () => {
             items: [
                 { path: '/laporan', name: 'Laporan', icon: FileText },
                 { path: '/buku-besar', name: 'Buku Besar', icon: BookOpen },
-                { path: '/coa', name: 'Daftar Akun (COA)', icon: List }, // New
-                { path: '/gaji', name: 'Karyawan & Gaji', icon: DollarSign }, // Renamed
+                { path: '/coa', name: 'Daftar Akun (COA)', icon: List },
+                { path: '/gaji', name: 'Karyawan & Gaji', icon: DollarSign },
                 { path: '/pengeluaran', name: 'Pengeluaran', icon: TrendingDown },
                 { path: '/jurnal', name: 'Jurnal Umum', icon: ClipboardList },
             ]
@@ -42,7 +42,7 @@ const Sidebar = () => {
         {
             title: 'PENGATURAN',
             items: [
-                { path: '/pengaturan', name: 'Pengaturan Toko', icon: Settings }, // New
+                { path: '/pengaturan', name: 'Pengaturan Toko', icon: Settings },
             ]
         }
     ];
@@ -50,9 +50,15 @@ const Sidebar = () => {
     return (
         <nav className="w-full h-full bg-[#0a0a0a]/90 backdrop-blur-xl border-r border-white/10 flex flex-col">
             <div className="p-6 flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-tr from-neon-cyan to-neon-purple rounded-lg shadow-[0_0_15px_rgba(0,243,255,0.5)] animate-pulse" />
-                <h1 className="text-xl font-bold tracking-wider font-neon text-white">
-                    NEON <span className="text-neon-cyan">3D</span>
+                <div className="w-8 h-8 rounded-lg shadow-[0_0_15px_rgba(0,243,255,0.5)] overflow-hidden flex items-center justify-center bg-gradient-to-tr from-neon-cyan to-neon-purple">
+                    {settings?.stampUrl ? (
+                        <img src={settings.stampUrl} alt="Logo" className="w-full h-full object-cover" />
+                    ) : (
+                        <div className="w-full h-full animate-pulse" />
+                    )}
+                </div>
+                <h1 className="text-xl font-bold tracking-wider font-neon text-white uppercase truncate">
+                    {settings?.name?.split(' ')[0] || 'NEON'} <span className="text-neon-cyan">{settings?.name?.split(' ').slice(1).join(' ') || '3D'}</span>
                 </h1>
             </div>
 
