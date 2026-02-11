@@ -1,5 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
+import { supabase } from '../lib/supabase';
+
 const DataContext = createContext();
 
 export const useData = () => useContext(DataContext);
@@ -20,35 +22,59 @@ export const DataProvider = ({ children }) => {
         { id: 2, name: 'Bob Nexus', role: 'Sales Associate', salary: 3200000, status: 'Menunggu', joinDate: '2023-03-10', phone: '089876543210' },
     ];
 
-    // PSAK Standard COA
+    // Comprehensive PSAK Standard COA
     const initialAccounts = [
         // 1-xxxx ASET (ASSETS)
+        // 1-1xxx Aset Lancar
         { code: '1-1100', name: 'Kas Tunai', type: 'Asset' },
         { code: '1-1110', name: 'Bank BCA', type: 'Asset' },
-        { code: '1-1120', name: 'QRIS / E-Wallet', type: 'Asset' },
+        { code: '1-1120', name: 'Bank Mandiri', type: 'Asset' },
+        { code: '1-1130', name: 'QRIS / E-Wallet', type: 'Asset' },
         { code: '1-1200', name: 'Piutang Usaha', type: 'Asset' },
         { code: '1-1300', name: 'Persediaan Barang Dagang', type: 'Asset' },
+        { code: '1-1400', name: 'Perlengkapan Toko', type: 'Asset' },
+        { code: '1-1500', name: 'Sewa Dibayar Dimuka', type: 'Asset' },
+
+        // 1-2xxx Aset Tetap
+        { code: '1-2100', name: 'Peralatan Toko', type: 'Asset' },
+        { code: '1-2110', name: 'Akumulasi Penyusutan Peralatan', type: 'Asset' }, // Contra Asset
+        { code: '1-2200', name: 'Kendaraan', type: 'Asset' },
+        { code: '1-2210', name: 'Akumulasi Penyusutan Kendaraan', type: 'Asset' },
 
         // 2-xxxx KEWAJIBAN (LIABILITIES)
+        // 2-1xxx Kewajiban Lancar
         { code: '2-1100', name: 'Hutang Usaha', type: 'Liability' },
         { code: '2-1200', name: 'Hutang Gaji', type: 'Liability' },
+        { code: '2-1300', name: 'Hutang Pajak', type: 'Liability' },
+
+        // 2-2xxx Kewajiban Jangka Panjang
+        { code: '2-2100', name: 'Hutang Bank', type: 'Liability' },
 
         // 3-xxxx EKUITAS (EQUITY)
         { code: '3-1000', name: 'Modal Pemilik', type: 'Equity' },
         { code: '3-2000', name: 'Prive Pemilik', type: 'Equity' },
+        { code: '3-3000', name: 'Laba Ditahan', type: 'Equity' },
 
         // 4-xxxx PENDAPATAN (REVENUE)
         { code: '4-1000', name: 'Pendapatan Penjualan', type: 'Revenue' },
-        { code: '4-2000', name: 'Pendapatan Jasa / Lainnya', type: 'Revenue' },
+        { code: '4-2000', name: 'Pendapatan Jasa', type: 'Revenue' },
+        { code: '4-3000', name: 'Pendapatan Lain-lain', type: 'Revenue' },
 
         // 5-xxxx BEBAN POKOK (COGS)
         { code: '5-1000', name: 'Harga Pokok Penjualan (HPP)', type: 'Expense' },
         { code: '5-2000', name: 'Potongan Penjualan', type: 'Expense' },
+        { code: '5-3000', name: 'Retur Penjualan', type: 'Expense' },
 
         // 6-xxxx BEBAN OPERASIONAL (EXPENSES)
         { code: '6-1000', name: 'Beban Gaji & Upah', type: 'Expense' },
-        { code: '6-2000', name: 'Beban Listrik, Air & Internet', type: 'Expense' },
-        { code: '6-3000', name: 'Beban Operasional Lainnya', type: 'Expense' },
+        { code: '6-1100', name: 'Beban Listrik, Air & Internet', type: 'Expense' },
+        { code: '6-1200', name: 'Beban Sewa', type: 'Expense' },
+        { code: '6-1300', name: 'Beban Iklan & Promosi', type: 'Expense' },
+        { code: '6-1400', name: 'Beban Perlengkapan', type: 'Expense' },
+        { code: '6-1500', name: 'Beban Transportasi', type: 'Expense' },
+        { code: '6-1600', name: 'Beban Pemeliharaan', type: 'Expense' },
+        { code: '6-1700', name: 'Beban Penyusutan', type: 'Expense' },
+        { code: '6-9000', name: 'Beban Operasional Lainnya', type: 'Expense' },
     ];
 
     const initialSettings = {
@@ -87,7 +113,7 @@ export const DataProvider = ({ children }) => {
     // --- Helpers ---
     const getAccountByPaymentMethod = (method) => {
         switch (method) {
-            case 'QRIS': return '1-1120'; // QRIS
+            case 'QRIS': return '1-1130'; // QRIS
             case 'Bank': return '1-1110'; // Bank BCA
             default: return '1-1100'; // Kas Tunai
         }
@@ -158,7 +184,7 @@ export const DataProvider = ({ children }) => {
 
         // 4. Shipping (Cr. Other Revenue)
         if (shipping > 0) {
-            credits.push({ code: '4-2000', amount: shipping });
+            credits.push({ code: '4-3000', amount: shipping }); // Pendapatan Lain-lain
         }
 
         addJournalEntry({
@@ -259,6 +285,27 @@ export const DataProvider = ({ children }) => {
         setJournal(prev => [newEntry, ...prev]);
     };
 
+    // 5. Clear All Data (Reset)
+    const clearAllData = () => {
+        localStorage.clear();
+        setProducts(initialProducts);
+        setTransactions([]);
+        setJournal([]);
+        setEmployees(initialEmployees);
+        setAccounts(initialAccounts);
+        setSettings(initialSettings);
+        setCustomers(initialCustomers);
+        setJobs([]);
+        window.location.reload(); // Force reload to clear any stale state
+    };
+
+    // 6. Supabase Logout
+    const logout = async () => {
+        if (window.confirm("Apakah Anda yakin ingin logout?")) {
+            await supabase.auth.signOut();
+        }
+    };
+
     // CRUDs
     const addProduct = (p) => setProducts([...products, { ...p, id: Date.now() }]);
     const updateProduct = (id, p) => setProducts(products.map(x => x.id === id ? { ...x, ...p } : x));
@@ -281,18 +328,17 @@ export const DataProvider = ({ children }) => {
     const deleteJob = (id) => setJobs(jobs.filter(x => x.id !== id));
 
     const updateSettings = (s) => setSettings({ ...settings, ...s });
-    const resetData = () => { localStorage.clear(); window.location.reload(); };
 
     return (
         <DataContext.Provider value={{
             products, transactions, journal, employees, accounts, settings, customers, jobs,
-            processSale, paySalary, restockProduct, addJournalEntry,
+            processSale, paySalary, restockProduct, addJournalEntry, clearAllData, logout,
             addProduct, updateProduct, deleteProduct,
             addEmployee, updateEmployee, deleteEmployee,
             addCustomer, updateCustomer, deleteCustomer,
             addAccount, updateAccount, deleteAccount,
             addJob, updateJob, deleteJob,
-            updateSettings, resetData
+            updateSettings
         }}>
             {children}
         </DataContext.Provider>

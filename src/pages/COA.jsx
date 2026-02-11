@@ -5,15 +5,39 @@ import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 
 const COA = () => {
-    const { accounts, addAccount, updateAccount, deleteAccount } = useData();
+    const { accounts, journal, addAccount, updateAccount, deleteAccount } = useData();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingAccount, setEditingAccount] = useState(null);
     const [formData, setFormData] = useState({ code: '', name: '', type: 'Asset' });
+
+    const formatRupiah = (number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number);
+
+    // Calculate Balances
+    const accountsWithBalance = accounts.map(acc => {
+        let balance = 0;
+        journal.forEach(entry => {
+            entry.lines.forEach(line => {
+                if (line.code === acc.code) {
+                    if (['Asset', 'Expense'].includes(acc.type)) {
+                        balance += (line.debit - line.credit);
+                    } else {
+                        balance += (line.credit - line.debit);
+                    }
+                }
+            });
+        });
+        return { ...acc, balance };
+    });
 
     // Columns
     const columns = [
         { header: 'Kode Akun', accessor: 'code', render: (acc) => <span className="font-mono text-neon-purple">{acc.code}</span> },
         { header: 'Nama Akun', accessor: 'name', render: (acc) => <div className="font-medium text-white">{acc.name}</div> },
+        {
+            header: 'Saldo Saat Ini',
+            accessor: 'balance',
+            render: (acc) => <span className={`font-mono font-bold ${acc.balance < 0 ? 'text-red-500' : 'text-white'}`}>{formatRupiah(acc.balance)}</span>
+        },
         {
             header: 'Tipe',
             accessor: 'type',
@@ -88,7 +112,7 @@ const COA = () => {
             <DataTable
                 title="Daftar Akun (COA)"
                 columns={columns}
-                data={accounts}
+                data={accountsWithBalance}
                 onAdd={() => openModal()}
                 searchPlaceholder="Cari nama atau kode akun..."
             />

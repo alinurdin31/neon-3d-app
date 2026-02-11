@@ -3,7 +3,7 @@ import { Save, Store, MapPin, Phone, Mail, Image, Settings } from 'lucide-react'
 import { useData } from '../context/DataContext';
 
 const Pengaturan = () => {
-    const { settings, updateSettings } = useData();
+    const { settings, updateSettings, clearAllData } = useData();
     const [formData, setFormData] = useState(settings);
     const [saved, setSaved] = useState(false);
 
@@ -18,8 +18,16 @@ const Pengaturan = () => {
         setTimeout(() => setSaved(false), 2000);
     };
 
+    const handleReset = () => {
+        if (window.confirm("PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data?")) {
+            if (window.confirm("Tindakan ini tidak dapat dibatalkan. Semua produk, pelanggan, transaksi, dan laporan akan dihapus secara permanen.")) {
+                clearAllData();
+            }
+        }
+    };
+
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto space-y-8 pb-12">
             <header className="flex items-center gap-4">
                 <div className="p-3 bg-neon-cyan/10 rounded-xl border border-neon-cyan/20">
                     <Settings className="w-8 h-8 text-neon-cyan" />
@@ -120,6 +128,25 @@ const Pengaturan = () => {
                     >
                         <Save className={`w-5 h-5 ${saved ? 'animate-bounce' : ''}`} />
                         {saved ? 'Berhasil Disimpan!' : 'Simpan Pengaturan'}
+                    </button>
+                </div>
+            </div>
+
+            {/* Danger Zone */}
+            <div className="border border-red-500/30 bg-red-500/5 rounded-xl p-8">
+                <h3 className="text-red-500 font-bold text-lg mb-2">Danger Zone</h3>
+                <p className="text-gray-400 text-sm mb-6">Tindakan di bawah ini bersifat destruktif dan tidak dapat dikembalikan. Harap berhati-hati.</p>
+
+                <div className="flex justify-between items-center bg-black/40 p-4 rounded-lg border border-red-500/10">
+                    <div>
+                        <h4 className="text-white font-medium">Hapus Semua Data Database</h4>
+                        <p className="text-gray-500 text-xs mt-1">Menghapus semua produk, pelanggan, transaksi, dan mereset COA ke default.</p>
+                    </div>
+                    <button
+                        onClick={handleReset}
+                        className="px-4 py-2 bg-red-500/20 text-red-500 border border-red-500/50 rounded-lg hover:bg-red-500 hover:text-white transition-all text-sm font-bold"
+                    >
+                        Reset Database
                     </button>
                 </div>
             </div>
