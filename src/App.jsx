@@ -19,7 +19,7 @@ import Pengaturan from './pages/Pengaturan';
 import PrintPage from './pages/PrintPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import { DataProvider } from './context/DataContext';
+import { useData } from './context/DataContext';
 import { supabase } from './lib/supabase';
 
 const PageWrapper = ({ children }) => (
@@ -63,19 +63,9 @@ const AnimatedRoutes = ({ user }) => {
 };
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [initializing, setInitializing] = useState(true);
+  const { user, loading } = useData();
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-      setInitializing(false);
-    };
-    checkUser();
-  }, []);
-
-  if (initializing) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-neon-cyan border-t-transparent rounded-full animate-spin" />
@@ -84,27 +74,25 @@ function App() {
   }
 
   return (
-    <DataProvider>
-      <Router>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-          <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
-          <Route path="/print/:type/:id" element={<PrintPage />} />
+    <Router>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+        <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
+        <Route path="/print/:type/:id" element={<PrintPage />} />
 
-          {/* Main App Layout */}
-          <Route path="/*" element={
-            user ? (
-              <Layout>
-                <AnimatedRoutes user={user} />
-              </Layout>
-            ) : (
-              <Navigate to="/login" />
-            )
-          } />
-        </Routes>
-      </Router>
-    </DataProvider>
+        {/* Main App Layout */}
+        <Route path="/*" element={
+          user ? (
+            <Layout>
+              <AnimatedRoutes user={user} />
+            </Layout>
+          ) : (
+            <Navigate to="/login" />
+          )
+        } />
+      </Routes>
+    </Router>
   );
 }
 

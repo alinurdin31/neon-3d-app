@@ -22,8 +22,8 @@ const Login = () => {
             setError(error.error_description || error.message || 'Login gagal. Periksa kembali email dan password Anda.');
             setLoading(false);
         } else {
-            navigate('/');
-            window.location.reload(); // Ensure everything syncs
+            // Use window.location.href for a clean, full-app reset and direct navigation
+            window.location.href = '/';
         }
     };
 
