@@ -34,6 +34,38 @@ export const DataProvider = ({ children }) => {
         { id: 2, name: 'PT. Teknologi Maju', phone: '021-999-888', address: 'Kawasan Industri Pulo Gadung' },
     ];
 
+    const initialAccounts = [
+        // 1-XXXX: ASET
+        { code: '1-1100', name: 'Kas Tunai', type: 'Aset', category: 'Aset Lancar', description: 'Uang kas di tangan' },
+        { code: '1-1110', name: 'Bank BCA', type: 'Aset', category: 'Aset Lancar', description: 'Rekening operasional' },
+        { code: '1-1130', name: 'Piutang QRIS', type: 'Aset', category: 'Aset Lancar', description: 'Dana mengendap dari QRIS' },
+        { code: '1-1200', name: 'Piutang Usaha', type: 'Aset', category: 'Aset Lancar', description: 'Tagihan ke pelanggan' },
+        { code: '1-1300', name: 'Persediaan Barang', type: 'Aset', category: 'Aset Lancar', description: 'Stok produk 3D' },
+        { code: '1-2100', name: 'Peralatan 3D Printer', type: 'Aset', category: 'Aset Tetap', description: 'Mesin printer 3D' },
+
+        // 2-XXXX: KEWAJIBAN
+        { code: '2-1100', name: 'Hutang Dagang', type: 'Kewajiban', category: 'Kewajiban Lancar', description: 'Hutang ke supplier' },
+        { code: '2-1200', name: 'Hutang Gaji', type: 'Kewajiban', category: 'Kewajiban Lancar', description: 'Gaji belum dibayar' },
+
+        // 3-XXXX: EKUITAS
+        { code: '3-1000', name: 'Modal Pemilik', type: 'Ekuitas', category: 'Modal', description: 'Modal awal' },
+        { code: '3-2000', name: 'Laba Ditahan', type: 'Ekuitas', category: 'Modal', description: 'Akumulasi keuntungan' },
+
+        // 4-XXXX: PENDAPATAN
+        { code: '4-1000', name: 'Pendapatan Penjualan', type: 'Pendapatan', category: 'Pendapatan Usaha', description: 'Hasil penjualan produk' },
+        { code: '4-2000', name: 'Pendapatan Jasa Cetak', type: 'Pendapatan', category: 'Pendapatan Usaha', description: 'Hasil jasa desain/cetak' },
+        { code: '4-3000', name: 'Pendapatan Pengiriman', type: 'Pendapatan', category: 'Pendapatan Lain', description: 'Ongkos kirim' },
+
+        // 5-XXXX: HARGA POKOK PENJUALAN
+        { code: '5-1000', name: 'HPP Penjualan', type: 'Beban', category: 'HPP', description: 'Harga pokok barang terjual' },
+        { code: '5-2000', name: 'Diskon Penjualan', type: 'Beban', category: 'Diskon', description: 'Potongan harga' },
+
+        // 6-XXXX: BEBAN
+        { code: '6-1000', name: 'Beban Gaji Karyawan', type: 'Beban', category: 'Beban Operasional', description: 'Gaji bulanan' },
+        { code: '6-2000', name: 'Beban Listrik & Internet', type: 'Beban', category: 'Beban Operasional', description: 'Utilitas' },
+        { code: '6-3000', name: 'Beban Sewa Tempat', type: 'Beban', category: 'Beban Operasional', description: 'Sewa gedung' },
+    ];
+
     // --- State ---
     const [user, setUser] = useState(null);
     const [products, setProducts] = useState([]);
@@ -69,38 +101,40 @@ export const DataProvider = ({ children }) => {
 
             // Map DB fields to local state names if needed
             // Seed initial data if Supabase is empty
-            if (!coa || coa.length === 0) {
+            if (Array.isArray(coa) && coa.length === 0) {
                 console.log('Seeding COA to Supabase...');
                 await supabase.from('chart_of_accounts').insert(initialAccounts);
                 const { data: newCoa } = await supabase.from('chart_of_accounts').select();
-                setAccounts(newCoa || []);
+                setAccounts(newCoa || initialAccounts);
+            } else if (Array.isArray(coa)) {
+                setAccounts(coa);
             } else {
-                setAccounts(coa || []);
+                setAccounts(initialAccounts);
             }
 
-            if (!p || p.length === 0) {
+            if (Array.isArray(p) && p.length === 0) {
                 console.log('Seeding initial products to Supabase...');
                 await supabase.from('products').insert(initialProducts.map(x => ({
                     name: x.name, category: x.category, price: x.price, cost_price: x.cost, stock: x.stock, status: x.status
                 })));
             }
 
-            if (!s || s.length === 0) {
+            if (Array.isArray(s) && s.length === 0) {
                 console.log('Seeding initial settings...');
                 await updateSettings(initialSettings);
-            } else {
+            } else if (Array.isArray(s) && s.length > 0) {
                 setSettings({ ...s[0], logoOp: s[0].logo_op });
             }
 
             // Map and Set for the rest
-            const currentP = p && p.length > 0 ? p : initialProducts;
+            const currentP = Array.isArray(p) && p.length > 0 ? p : initialProducts;
             setProducts(currentP.map(x => ({ ...x, cost: Number(x.cost_price || x.cost) })));
 
-            const currentE = e && e.length > 0 ? e : initialEmployees;
+            const currentE = Array.isArray(e) && e.length > 0 ? e : initialEmployees;
             setEmployees(currentE.map(x => ({ ...x, joinDate: x.join_date || x.joinDate })));
 
-            setCustomers(c || []);
-            setJobs((j || []).map(x => ({ ...x, customerId: x.customer_id, employeeId: x.employee_id })));
+            setCustomers(Array.isArray(c) ? c : []);
+            setJobs((Array.isArray(j) ? j : []).map(x => ({ ...x, customerId: x.customer_id, employeeId: x.employee_id })));
 
             // Reconstruct Journal
             const fullJournal = (j_entries || []).map(entry => ({
