@@ -107,14 +107,6 @@ const Login = () => {
                     </button>
                 </form>
 
-                <div className="mt-8 pt-6 border-t border-white/5 text-center">
-                    <p className="text-gray-500 text-sm">
-                        Belum punya akun?{' '}
-                        <Link to="/register" className="text-neon-cyan hover:underline font-bold">
-                            Daftar Gratis
-                        </Link>
-                    </p>
-                </div>
             </motion.div>
 
             {/* Footer info */}

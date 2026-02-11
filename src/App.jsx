@@ -18,7 +18,6 @@ import Pekerjaan from './pages/Pekerjaan';
 import Pengaturan from './pages/Pengaturan';
 import PrintPage from './pages/PrintPage';
 import Login from './pages/Login';
-import Register from './pages/Register';
 import { useData } from './context/DataContext';
 import { supabase } from './lib/supabase';
 
@@ -78,7 +77,6 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-        <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
         <Route path="/print/:type/:id" element={<PrintPage />} />
 
         {/* Main App Layout */}

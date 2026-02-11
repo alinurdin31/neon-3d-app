@@ -321,21 +321,66 @@ export const DataProvider = ({ children }) => {
         fetchAllData();
     };
 
+    // 5. Clear All Data (Reset)
     const clearAllData = async () => {
-        if (!window.confirm("RESET DATABASE: Semua data di Supabase akan dibersihkan. Lanjut?")) return;
+        setLoading(true);
+        try {
+            // Delete in correct order to avoid foreign key violations
+            const tables = [
+                'sale_items',
+                'sales',
+                'journal_lines',
+                'journal_entries',
+                'jobs',
+                'employees',
+                'products',
+                'customers',
+                'chart_of_accounts',
+                'app_settings'
+            ];
 
-        // This is complex for Supabase without a stored procedure, 
-        // but for now let's just clear local state and alert
-        // A real implementation would delete all rows from tables.
+            for (const t of tables) {
+                await supabase.from(t).delete({});
+            }
 
-        const tables = ['journal_lines', 'journal_entries', 'jobs', 'employees', 'products', 'customers', 'sales', 'sale_items'];
-        for (const t of tables) {
-            // Delete all (using a range match or similar if supported)
-            // supabase-js normally uses .delete().neq('id', 0)
-            await supabase.from(t).delete({});
+            // Re-seed with initial data
+            // 1. Chart of Accounts
+            await supabase.from('chart_of_accounts').insert(initialAccounts);
+
+            // 2. Default Products
+            await supabase.from('products').insert(initialProducts.map(p => ({
+                name: p.name,
+                category: p.category,
+                price: p.price,
+                cost_price: p.cost,
+                stock: p.stock,
+                status: p.status
+            })));
+
+            // 3. Default Customers
+            await supabase.from('customers').insert(initialCustomers);
+
+            // 4. Default Employees
+            await supabase.from('employees').insert(initialEmployees.map(e => ({
+                name: e.name,
+                role: e.role,
+                salary: e.salary,
+                status: e.status,
+                phone: e.phone
+            })));
+
+            // 5. Default Settings
+            await supabase.from('app_settings').upsert({
+                id: 1, // Only one record
+                ...initialSettings
+            });
+
+            window.location.reload();
+        } catch (error) {
+            console.error("Reset Error:", error);
+            alert("Gagal mereset database. Silakan coba lagi.");
+            setLoading(false);
         }
-
-        window.location.reload();
     };
 
     const logout = async () => {

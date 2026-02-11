@@ -108,7 +108,13 @@ export const supabase = {
                 return { data: await res.json(), error: res.ok ? null : true };
             },
             delete: async (match) => {
-                const queryParams = Object.keys(match).map(k => `${k}=eq.${match[k]}`).join('&');
+                let queryParams = '';
+                if (Object.keys(match).length === 0) {
+                    // To delete all rows, we need a filter. id != -1 is safe for auto-incrementing IDs.
+                    queryParams = 'id=neq.-1';
+                } else {
+                    queryParams = Object.keys(match).map(k => `${k}=eq.${match[k]}`).join('&');
+                }
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${queryParams}`, {
                     method: 'DELETE',
                     headers: { ...headers, 'Authorization': getAuthHeader() }
