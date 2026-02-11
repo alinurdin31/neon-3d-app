@@ -8,16 +8,47 @@ import { SlipGaji } from '../components/documents/SlipGaji';
 
 const PrintPage = () => {
     const { type, id } = useParams();
-    const { transactions, employees } = useData();
+    const { getSaleDetails, customers, employees } = useData();
+    const [transaction, setTransaction] = useState(null);
+    const [loading, setLoading] = useState(true);
     const contentRef = useRef(null);
 
     useEffect(() => {
-        // Auto print when page loads
-        const timer = setTimeout(() => {
-            window.print();
-        }, 500);
-        return () => clearTimeout(timer);
-    }, []);
+        const fetchTransaction = async () => {
+            if (type === 'slip-gaji') {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const saleData = await getSaleDetails(id);
+                // Enrich with customer data if available
+                const customer = customers.find(c => c.id === saleData.customer_id);
+
+                setTransaction({
+                    ...saleData,
+                    customer_address: customer?.address || '-',
+                    customer_phone: customer?.phone || '-'
+                });
+            } catch (err) {
+                console.error("Failed to fetch transaction for print:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTransaction();
+    }, [id, type, getSaleDetails, customers]);
+
+    useEffect(() => {
+        if (!loading && (transaction || type === 'slip-gaji')) {
+            // Auto print when data is ready
+            const timer = setTimeout(() => {
+                window.print();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [loading, transaction, type]);
 
     if (type === 'slip-gaji') {
         const employee = employees.find(e => e.id.toString() === id);
@@ -26,8 +57,8 @@ const PrintPage = () => {
     }
 
     // Transaction based documents
-    const transaction = transactions.find(t => t.id === id);
-    if (!transaction) return <div>Transaksi tidak ditemukan: {id}</div>;
+    if (loading) return <div className="p-10 text-center">Memuat data...</div>;
+    if (!transaction && type !== 'slip-gaji') return <div>Transaksi tidak ditemukan: {id}</div>;
 
     switch (type) {
         case 'struk':

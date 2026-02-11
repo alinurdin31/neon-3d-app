@@ -26,15 +26,16 @@ export const Faktur = forwardRef(({ transaction }, ref) => {
                 <div className="text-right">
                     <h1 className="text-5xl font-bold text-gray-200 mb-2">INVOICE</h1>
                     <p className="text-xl font-bold text-gray-800">#{transaction.id}</p>
-                    <p className="text-gray-500">Tanggal: {transaction.date}</p>
+                    <p className="text-gray-500">Tanggal: {new Date(transaction.created_at).toLocaleDateString('id-ID')}</p>
                 </div>
             </div>
 
             {/* Bill To */}
             <div className="mb-12">
                 <h3 className="text-gray-500 uppercase text-sm font-bold mb-2">Ditagihkan Kepada:</h3>
-                <h2 className="text-2xl font-bold">{transaction.customerName || 'Pelanggan Umum'}</h2>
-                <p className="text-gray-600 max-w-md">{transaction.customerAddress || '-'}</p>
+                <h2 className="text-2xl font-bold">{transaction.customer_name || 'Pelanggan Umum'}</h2>
+                <p className="text-gray-600 max-w-md">{transaction.customer_address || '-'}</p>
+                <p className="text-gray-600 max-w-md">{transaction.customer_phone || '-'}</p>
             </div>
 
             {/* Table */}
@@ -48,9 +49,9 @@ export const Faktur = forwardRef(({ transaction }, ref) => {
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                    {transaction.items.map((item, idx) => (
+                    {transaction.items && transaction.items.map((item, idx) => (
                         <tr key={idx}>
-                            <td className="py-4 px-4 font-medium">{item.name}</td>
+                            <td className="py-4 px-4 font-medium">{item.product_name}</td>
                             <td className="py-4 px-4 text-center">{item.quantity}</td>
                             <td className="py-4 px-4 text-right">{formatRupiah(item.price)}</td>
                             <td className="py-4 px-4 text-right font-bold">{formatRupiah(item.price * item.quantity)}</td>
@@ -87,7 +88,7 @@ export const Faktur = forwardRef(({ transaction }, ref) => {
 
             {/* Footer */}
             <div className="text-center text-gray-500 text-sm mt-auto pt-12 border-t border-gray-200">
-                <p>Pembayaran via {transaction.paymentMethod}. Terima kasih atas kepercayaan Anda.</p>
+                <p>Pembayaran via {transaction.payment_method}. Terima kasih atas kepercayaan Anda.</p>
                 <p className="mt-2 font-mono text-xs">{settings.phone} | {settings.email}</p>
             </div>
         </div>

@@ -17,7 +17,7 @@ export const SuratJalan = forwardRef(({ transaction }, ref) => {
                 <div className="text-right">
                     <h1 className="text-4xl font-bold border-2 border-black px-4 py-1 inline-block mb-2">SURAT JALAN</h1>
                     <p className="font-bold">No: SJ-{transaction.id}</p>
-                    <p className="text-gray-500">Tanggal: {transaction.date}</p>
+                    <p className="text-gray-500">Tanggal: {new Date(transaction.created_at).toLocaleDateString('id-ID')}</p>
                 </div>
             </div>
 
@@ -26,9 +26,9 @@ export const SuratJalan = forwardRef(({ transaction }, ref) => {
                 <div>
                     <h3 className="text-xs uppercase font-bold text-gray-500 mb-1">Penerima:</h3>
                     <div className="border border-black p-4 min-h-[100px]">
-                        <p className="font-bold text-lg">{transaction.customerName || 'Pelanggan Umum'}</p>
-                        <p>{transaction.customerAddress}</p>
-                        <p className="mt-2 text-sm text-gray-600">{transaction.customerPhone}</p>
+                        <p className="font-bold text-lg">{transaction.customer_name || 'Pelanggan Umum'}</p>
+                        <p>{transaction.customer_address || '-'}</p>
+                        <p className="mt-2 text-sm text-gray-600">{transaction.customer_phone || '-'}</p>
                     </div>
                 </div>
                 <div>
@@ -52,12 +52,12 @@ export const SuratJalan = forwardRef(({ transaction }, ref) => {
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-black">
-                    {transaction.items.map((item, idx) => (
+                    {transaction.items && transaction.items.map((item, idx) => (
                         <tr key={idx}>
                             <td className="py-3 px-4 text-center border-r border-black">{idx + 1}</td>
-                            <td className="py-3 px-4 font-medium border-r border-black">{item.name}</td>
+                            <td className="py-3 px-4 font-medium border-r border-black">{item.product_name}</td>
                             <td className="py-3 px-4 text-center border-r border-black font-bold text-lg">{item.quantity}</td>
-                            <td className="py-3 px-4 text-center">Pcs</td> // Default unit
+                            <td className="py-3 px-4 text-center">Pcs</td>
                         </tr>
                     ))}
                 </tbody>

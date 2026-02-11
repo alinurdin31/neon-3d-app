@@ -19,16 +19,16 @@ export const StrukBelanja = forwardRef(({ transaction }, ref) => {
             {/* Info */}
             <div className="mb-4">
                 <div className="flex justify-between"><span>No:</span><span>{transaction.id}</span></div>
-                <div className="flex justify-between"><span>Tgl:</span><span>{transaction.date}</span></div>
+                <div className="flex justify-between"><span>Tgl:</span><span>{new Date(transaction.created_at).toLocaleString('id-ID')}</span></div>
                 <div className="flex justify-between"><span>Kasir:</span><span>Admin</span></div>
-                <div className="flex justify-between"><span>Pelanggan:</span><span>{transaction.customerName || 'Umum'}</span></div>
+                <div className="flex justify-between"><span>Pelanggan:</span><span>{transaction.customer_name || 'Umum'}</span></div>
             </div>
 
             {/* Items */}
             <div className="border-b border-dashed border-black pb-2 mb-2">
-                {transaction.items.map((item, idx) => (
+                {transaction.items && transaction.items.map((item, idx) => (
                     <div key={idx} className="mb-1">
-                        <div className="font-bold">{item.name}</div>
+                        <div className="font-bold">{item.product_name}</div>
                         <div className="flex justify-between">
                             <span>{item.quantity} x {formatRupiah(item.price)}</span>
                             <span>{formatRupiah(item.quantity * item.price)}</span>
@@ -50,7 +50,7 @@ export const StrukBelanja = forwardRef(({ transaction }, ref) => {
                     <span>TOTAL:</span><span>{formatRupiah(transaction.total)}</span>
                 </div>
                 <div className="flex justify-between text-xs mt-1">
-                    <span>Metode:</span><span className="font-bold uppercase">{transaction.paymentMethod}</span>
+                    <span>Metode:</span><span className="font-bold uppercase">{transaction.payment_method}</span>
                 </div>
             </div>
 
